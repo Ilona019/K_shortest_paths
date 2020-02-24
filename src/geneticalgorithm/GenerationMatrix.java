@@ -1,10 +1,9 @@
-package main;
+package geneticalgorithm;
 
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import grapheditor.GraphElements;
 import grapheditor.GraphElements.MyEdgeFactory;
 import grapheditor.GraphElements.MyVertexFactory;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -19,7 +18,7 @@ public class GenerationMatrix {
     private int s;
     private int t;
 
-    GenerationMatrix(SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> graph, String s1, String t1) {
+  public  GenerationMatrix(SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> graph, String s1, String t1) {
         this.graph = graph;
         matrix = new int[graph.getVertexCount()][];
         renameV = new HashMap<>();
@@ -37,7 +36,7 @@ public class GenerationMatrix {
         }
     }
     
-    public  GenerationMatrix(int countVertex, String s1, String t1) {
+    public GenerationMatrix(int countVertex, String s1, String t1) {
          matrix = new int[countVertex][];
          renameV = new HashMap<>();
          for (int i = 1, l = 1; i < countVertex; i++, l++) {
@@ -68,7 +67,7 @@ public class GenerationMatrix {
                 
                 if(matrix[i][j] != 0) {
                     graph.addEdge(myEdgeFactory.create(), renameV.get(i),renameV.get(j));
-                    myEdgeFactory.setWeight(matrix[i][j]);
+                    myEdgeFactory.setDefaultWeight(matrix[i][j]);
                 }                   
             }
         }

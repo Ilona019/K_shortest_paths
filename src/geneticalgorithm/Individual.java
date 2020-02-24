@@ -1,4 +1,4 @@
-package main;
+package geneticalgorithm;
 
 import grapheditor.GraphElements;
 import grapheditor.GraphElements.MyEdge;
@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 /**
  *
@@ -41,14 +42,15 @@ public class Individual {
           
         int pred = s;
         chromosome.addFirst(s);
+        Random random = new Random();
             while (i != 1) {  
-                    int verRandom = (int) (Math.random() * countVertex);
+                    int verRandom = random.nextInt(countVertex-1);
                     if (verRandom != s && verRandom != t && matrix.getWeight(pred, verRandom ) != 0) {
                         pred = verRandom;
                         chromosome.add(verRandom);
                         i--;
                     }
-                    if(matrix.getWeight(verRandom, t)!= 0){
+                    else if (matrix.getWeight(verRandom, t)!= 0){
                         break;
                     }
             }
@@ -60,9 +62,6 @@ public class Individual {
                 removeDublicatesVertex();
                 System.out.println("Новая хромосома - "+ printChromosome(matrix));
            } else {
-//                chromosome.removeLast();
-//                pred = chromosome.getLast();
-//                i=2;
                        chromosome.clear();
            
            }
@@ -94,7 +93,7 @@ public class Individual {
     //Представляет ли хромосома путь.
     public boolean isPath(GenerationMatrix matrix) {
         for (int j = 0; j < chromosome.size() - 1; j++) {
-            if (matrix.getWeight(chromosome.get(j), chromosome.get(j + 1)) == 0)//нет ребра между вершинами, хромосома не образует путь;
+            if (matrix.getWeight(chromosome.get(j), chromosome.get(j + 1)) == 0 || matrix.getS() != chromosome.getFirst() || matrix.getT()!= chromosome.getLast())//нет ребра между вершинами, хромосома не образует путь;
             {
                 return false;
             }
@@ -200,36 +199,43 @@ public class Individual {
     
     //мутация в гене, вставить случайную вершину.
     public boolean mutation(GenerationMatrix matrix, int b) {
-        if(matrix.getCountVerteces() == 2 || chromosome.size()==2) {
+        if (matrix.getCountVerteces() == 2) {
             return false;
         }
-                
-        int positionChromosome = (int) (Math.random() * (chromosome.size() - 3)) + 1;
+
         Integer randomVertex;
-        
-        
-        do {
-            randomVertex = (int) (Math.random() * matrix.getCountVerteces());
-        } while (randomVertex == chromosome.get(0) || randomVertex == chromosome.getLast());
-        
-        chromosome.add(positionChromosome, randomVertex);
-        chromosome.remove(positionChromosome+1);
+        int positionChromosome;
+        if (chromosome.size() != 2) {
+            positionChromosome = (int) (Math.random() * (chromosome.size() - 3)) + 1;
+
+            do {
+                randomVertex = (int) (Math.random() * matrix.getCountVerteces());
+            } while (randomVertex == chromosome.get(0) || randomVertex == chromosome.getLast());
+
+            chromosome.add(positionChromosome, randomVertex);
+            chromosome.remove(positionChromosome + 1);
+        }
         
         //вставить на случайную позицию вершину
+        if(chromosome.size() == 2)
+            positionChromosome = 1;
+        else
         positionChromosome = (int) (Math.random() * (chromosome.size() - 3)) + 1;
+        System.out.println(positionChromosome);
         do {
             randomVertex = (int) (Math.random() * matrix.getCountVerteces());
         } while (randomVertex == chromosome.get(0) || randomVertex == chromosome.getLast());
-        
-                chromosome.add(positionChromosome, randomVertex);
-                        removeDublicatesVertex();
+        System.out.println(positionChromosome+" "+ randomVertex);
+
+        chromosome.add(positionChromosome, randomVertex);
+        removeDublicatesVertex();
         if (isPath(matrix)) {
             route = fitnessFunctionPath(matrix);
             fitnessF = fitnessFunctionWeight(b);
             formEdgesList(matrix);
-          
-             System.out.print(printChromosome(matrix));
-            System.out.print(" position "+positionChromosome+" replaced "+randomVertex);
+
+            System.out.print(printChromosome(matrix));
+            System.out.print(" position " + positionChromosome + " replaced " + randomVertex);
             return true;
         }
         return false;

@@ -1,4 +1,4 @@
-package main;
+package geneticalgorithm;
 
 import java.util.LinkedList;
 import java.util.ListIterator;

@@ -1,5 +1,5 @@
 
-package main;
+package geneticalgorithm;
 import java.util.Comparator;
 
 /**
