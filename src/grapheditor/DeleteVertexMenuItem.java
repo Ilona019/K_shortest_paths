@@ -17,12 +17,10 @@ public class DeleteVertexMenuItem<V> extends JMenuItem implements VertexMenuList
     /** Creates a new instance of DeleteVertexMenuItem */
     public DeleteVertexMenuItem() {
         super("Delete Vertex");
-        this.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e) {
-                visComp.getPickedVertexState().pick(vertex, false);
-                visComp.getGraphLayout().getGraph().removeVertex(vertex);
-                visComp.repaint();
-            }
+        this.addActionListener((ActionEvent e) -> {
+            visComp.getPickedVertexState().pick(vertex, false);
+            visComp.getGraphLayout().getGraph().removeVertex(vertex);
+            visComp.repaint();
         });
     }
 
@@ -31,6 +29,7 @@ public class DeleteVertexMenuItem<V> extends JMenuItem implements VertexMenuList
      * @param v 
      * @param visComp 
      */
+    @Override
     public void setVertexAndView(V v, VisualizationViewer visComp) {
         this.vertex = v;
         this.visComp = visComp;

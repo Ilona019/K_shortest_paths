@@ -1,5 +1,6 @@
 package geneticalgorithm;
 
+import grapheditor.GenerationMatrix;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -11,22 +12,29 @@ public class GeneticAlgorithm {
 
     private Population population;
     private int[] masPair;
-    private theChoiceOfTheParents choiceParents;//Тип оператора отбора родителей.
+    private ChoiceOfParents choiceParents;//Тип оператора отбора родителей.
     private CrossingType crossingType;//Тип скрещивания.
     private SelectionType selectionType;//Тип селекции.
     private GenerationMatrix matrix;
     private int b;
     private int n;
     private LinkedList<Individual> reserveChromosomes;
+    
+    public GeneticAlgorithm() {
+        this.choiceParents = ChoiceOfParents.valueOf("Panmixia".toUpperCase().replace(' ', '_'));
+        this.crossingType = CrossingType.valueOf("Single point crossover".toUpperCase().replace(' ', '_'));
+        this.selectionType = SelectionType.valueOf("Elite".toUpperCase().replace(' ', '_'));
+        this.n = 20;
+    }
 
     public GeneticAlgorithm(GenerationMatrix matrix, Population population, String choiceParents, String crossingType, String selectionType, int b, int n) {
         this.matrix = matrix;
  
         this.population = population;
         masPair = new int[2 * population.size()];
-        this.choiceParents = theChoiceOfTheParents.valueOf(choiceParents.toUpperCase().replace(' ', '_'));
-        this.crossingType = CrossingType.valueOf(crossingType.toUpperCase().replace(' ', '_'));
-        this.selectionType = SelectionType.valueOf(selectionType.toUpperCase().replace(' ', '_'));
+        this.choiceParents = ChoiceOfParents.valueOf(choiceParents.replace(' ', '_'));
+        this.crossingType = CrossingType.valueOf(crossingType.replace(' ', '_'));
+        this.selectionType = SelectionType.valueOf(selectionType.replace(' ', '_'));
         this.b = b;
         this.n = n;
         reserveChromosomes = new LinkedList<>();
@@ -69,7 +77,7 @@ public class GeneticAlgorithm {
         }
     }
 
-    public enum theChoiceOfTheParents {
+    public enum ChoiceOfParents {
         PANMIXIA, INBREEDING, OUTBREEDING
     }
     //Выбор родителей, разбиение на пары.
@@ -142,7 +150,7 @@ public class GeneticAlgorithm {
                    
                    
         int point2;//индекс эквивалентной вершины
-        int flag = -1;
+        int flag;
         if (reserveChromosomes.isEmpty()) {
             flag = 0;//сокращаем хромосому до конца
         } else {
@@ -164,7 +172,7 @@ public class GeneticAlgorithm {
                     currentChromosome.cutPartChromosome(point1, point2);
                     printReserveList();
                     currentChromosome.recalculateFitnessFunc(matrix, b);//изменилась длина маршрута и надо пересчитать фитнесс функцию
-                    currentChromosome.formEdgesList(matrix);
+                  //  currentChromosome.formEdgesList(matrix);
                     if (flag == 1) {
                         break;
                     }
@@ -225,9 +233,9 @@ public class GeneticAlgorithm {
     
     public void twoPointCrossover(Individual parent1, Individual parent2) {
         int indexBeginFirst = -1;
-        int indexEndFirst = -1;
+        int indexEndFirst;
         int indexBeginSecond = -1;
-        int indexEndSecond = -1;
+        int indexEndSecond;
         Individual parentFirst;
         Individual parentSecond;
         if (parent1.getChromomeStructure().size() > parent2.getChromomeStructure().size()) {
@@ -271,5 +279,37 @@ public class GeneticAlgorithm {
             }
         }
 
+    }
+    
+    public int getN() {
+        return n;
+    }
+    
+    public String getSelectionType() {
+        return selectionType.toString().replace('_', ' ');
+    }
+    
+    public String getСrossingType() {
+        return crossingType.toString().replace('_', ' ');
+    }
+    
+    public String getChoiceParents() {
+        return choiceParents.toString().replace('_', ' ');
+    }
+    
+    public void setN(int n) {
+         this.n = n;
+    }
+    
+    public void setSelectionType(String selectionType) {
+        this.selectionType = SelectionType.valueOf(selectionType.replace(' ', '_'));
+    }
+    
+    public void setСrossingType(String crossingType) {
+        this.crossingType =  CrossingType.valueOf(crossingType.toUpperCase().replace(' ', '_'));
+    }
+    
+    public void setChoiceParents(String choiceParents) {
+        this.choiceParents = ChoiceOfParents.valueOf(choiceParents.toUpperCase().replace(' ', '_'));
     }
 }

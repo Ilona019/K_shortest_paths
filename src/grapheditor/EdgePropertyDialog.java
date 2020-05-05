@@ -1,17 +1,20 @@
 
 package grapheditor;
 
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+
 
 public class EdgePropertyDialog extends javax.swing.JDialog {
     GraphElements.MyEdge edge;
+    VisualizationViewer visComp;
     
     /** Creates new form EdgePropertyDialog */
-    public EdgePropertyDialog(java.awt.Frame parent, GraphElements.MyEdge edge) {
+    public EdgePropertyDialog(java.awt.Frame parent, GraphElements.MyEdge edge,  VisualizationViewer visComp) {
         super(parent, true);
         initComponents();
         this.edge = edge;
+        this.visComp = visComp;
         setTitle("Edge: " + edge.toString());
-       // this.capFormattedTextField.setValue(edge.getCapacity() );
         this.wtFormattedTextField.setValue(edge.getWeight());
     }
     
@@ -69,9 +72,10 @@ public class EdgePropertyDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void okButtonHandler(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonHandler
-        //edge.setCapacity((Double)this.capFormattedTextField.getValue());
+        
         edge.setWeight((Integer)this.wtFormattedTextField.getValue());
         dispose();
+        visComp.repaint();
     }//GEN-LAST:event_okButtonHandler
     
     

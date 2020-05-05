@@ -37,11 +37,13 @@ public class MyMouseMenus {
         VisualizationViewer visComp;
         Point2D point;
         
+        @Override
         public void setEdgeAndView(GraphElements.MyEdge edge, VisualizationViewer visComp) {
             this.edge = edge;
             this.visComp = visComp;
         }
 
+        @Override
         public void setPoint(Point2D point) {
             this.point = point;
         }
@@ -49,8 +51,9 @@ public class MyMouseMenus {
         public  EdgePropItem(final JFrame frame) {            
             super("Edit Edge Properties...");
             this.addActionListener(new ActionListener() {
+                @Override
                 public void actionPerformed(ActionEvent e) {
-                    EdgePropertyDialog dialog = new EdgePropertyDialog(frame, edge);
+                    EdgePropertyDialog dialog = new EdgePropertyDialog(frame, edge, visComp);
                     dialog.setLocation((int)point.getX()+ frame.getX(), (int)point.getY()+ frame.getY());
                     dialog.setVisible(true);
                 }
@@ -60,6 +63,7 @@ public class MyMouseMenus {
         
     }
     public static class WeightDisplay extends JMenuItem implements EdgeMenuListener<grapheditor.GraphElements.MyEdge> {
+        @Override
         public void setEdgeAndView(GraphElements.MyEdge e, VisualizationViewer visComp) {
             this.setText("Weight " + e + " = " + e.getWeight());
         }

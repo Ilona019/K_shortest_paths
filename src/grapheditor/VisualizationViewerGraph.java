@@ -1,5 +1,6 @@
 package grapheditor;
 
+
 import edu.uci.ics.jung.algorithms.layout.KKLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -32,19 +33,15 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import javafx.scene.control.TextField;
 import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
-import geneticalgorithm.GenerationMatrix;
-import geneticalgorithm.Population;
 import org.apache.commons.collections15.Predicate;
+import main.ValidateInput;
 
 /**
  *
  * @author Илона
  */
-public class VisualizationViewerGraph {
+public class VisualizationViewerGraph{
 
     private SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> graph;
     private GenerationMatrix matrix;
@@ -59,11 +56,13 @@ public class VisualizationViewerGraph {
     final JFrame frame;
     private TextField s;
     private TextField t;
-    private Population population;
+    private ArrayList<LinkedList<Integer>> listOfShortcut;
+    private ValidateInput validationInput;
+    private RandomGraphEditDialog currentRandomGraphEditDialog;
 
     public VisualizationViewerGraph(TextField s, TextField t) {
         this.matrix = null;
-        this.population = null;
+        listOfShortcut = new ArrayList();
         this.s = s;
         this.t = t;
         graph = new SparseMultigraph<>();
@@ -71,6 +70,7 @@ public class VisualizationViewerGraph {
         layout = new KKLayout(graph);
         layout.setSize(new Dimension(1000, 1000));
         vv = new VisualizationViewer<>(layout);
+        
 
         settingsVisualizationGraph();
 
@@ -95,39 +95,12 @@ public class VisualizationViewerGraph {
 
         createButtons(menuBar);
 
+        currentRandomGraphEditDialog = new RandomGraphEditDialog();
         btnRandomGraph.addActionListener((ActionEvent eventRandom) -> {
-            clearGraph();
-
-            JFrame frameCountVertex = new JFrame("Enter");
-            JPanel panel = new JPanel(new FlowLayout());
-            JLabel label = new JLabel("Enter count vertex: ");
-            JTextField textCountVertex = new JTextField(10);
-            JButton btnCountVertex = new JButton("Ok");
-            panel.add(label);
-            panel.add(textCountVertex);
-            panel.add(btnCountVertex);
-            frameCountVertex.getContentPane().add(panel);
-            frameCountVertex.setPreferredSize(new Dimension(200, 100));
-            frameCountVertex.setLocation(80, 100);
-            frameCountVertex.pack();
-            frameCountVertex.setVisible(true);
-
-            btnCountVertex.addActionListener((ActionEvent e1) -> {
-                String inputStr = "";
-                inputStr = textCountVertex.getText();
-                if (!isPositiveNumber(inputStr)) {
-                    JOptionPane.showMessageDialog(panel, " You incorrectly input number vertex! It is  positive, integer number.");
-                } else {
-                    frameCountVertex.setVisible(false);
-                    matrix = new GenerationMatrix(Integer.parseInt(inputStr), s.getText(), t.getText());
-                    graph = matrix.getGraf();
-                    layout.setGraph(graph);
-                    matrix.printMatrix();
-                    frame.repaint();
-                }
-            });
+            RandomGraphEditDialog randomGraphEditDialog = new RandomGraphEditDialog(this, currentRandomGraphEditDialog);
+            currentRandomGraphEditDialog = randomGraphEditDialog.getrandomGraphEditDialog();
         });
-
+        
         btnClear.addActionListener((ActionEvent eventClear) -> {
             clearGraph();
         });
@@ -151,7 +124,7 @@ public class VisualizationViewerGraph {
         frame.pack();
         frame.setVisible(true);
 
-    }
+}
 
     // Add some popup menus for the edges and vertices to our mouse plugin.
     private void createPopupMenu(PopupVertexEdgeMenuMousePlugin myPlugin) {
@@ -238,18 +211,11 @@ public class VisualizationViewerGraph {
     private void createButtons(JMenuBar menuBar) {
         btnRandomGraph = new JButton("Draw random graph");
         menuBar.add(btnRandomGraph);
-        btnDeleteParalEdges = new JButton("Delete Paral Edge");
+        btnDeleteParalEdges = new JButton("Delete color edges");
         menuBar.add(btnDeleteParalEdges);
         btnClear = new JButton("Clear");
         menuBar.add(btnClear);
 
-    }
-
-    private boolean isPositiveNumber(String text) {
-        if (!text.matches("[\\+]?[1-9][0-9]*")) {
-            return false;
-        }
-        return true;
     }
 
     public SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> getGraph() {
@@ -259,7 +225,7 @@ public class VisualizationViewerGraph {
     public Layout getLayout() {
         return layout;
     }
-
+     
     public ArrayList<ArrayList<GraphElements.MyEdge>> getPaintedEdgeslist() {
         return paintedEdgeslist;
     }
@@ -267,9 +233,14 @@ public class VisualizationViewerGraph {
     public ArrayList<MyEdge> getChEdgeList() {
         return chEdgeList;
     }
+    
+    public void setValidationInput(ValidateInput validationInput) {
+        this.validationInput = validationInput;
+    }
 
-    public void setPopulation(Population population) {
-        this.population = population;
+    
+    public void setListOfShortcut(ArrayList<LinkedList<Integer>> list) {
+        this.listOfShortcut = list;
     }
 
     public void setPaintedEdgeslist(ArrayList<ArrayList<GraphElements.MyEdge>> paintedEdgeslist) {
@@ -288,17 +259,21 @@ public class VisualizationViewerGraph {
      * *
      * isEdgecontainsInPath checks if edge is contained in chEdgesList
      *
+     * @param countRoutes
      */
-    public void addParalEdges() {
+    public void addParalEdges(int countRoutes) {
         chEdgeList = new ArrayList<>();
         int numEdge = 0;
         paintedEdgeslist = new ArrayList<>();//список списков для раскрашивания ребер каждого пути в определённый цвет
+        if(listOfShortcut.size() < countRoutes)
+            countRoutes = listOfShortcut.size();
+        
         //По всевозможным найденым путям пройтись
-        ArrayList<GraphElements.MyEdge> copyLayout = new ArrayList<GraphElements.MyEdge>(layout.getGraph().getEdges());//скопировала массив вершин без добавленные ребер
-        for (int i = 0; i < population.size(); i++) {
+        ArrayList<GraphElements.MyEdge> copyLayout = new ArrayList<>(layout.getGraph().getEdges());//скопировала массив вершин без добавленные ребер
+        for (int i = 0; i < countRoutes; i++) {
             ArrayList<GraphElements.MyEdge> path = new ArrayList<>();
             paintedEdgeslist.add(path);
-            chEdgeList = population.getAtIndex(i).getEdgeList();//получить список ребер.
+            chEdgeList = formEdgesList(listOfShortcut.get(i));//получить список ребер.
             // for all edges, paint edges that are in minimum path 
             for (GraphElements.MyEdge e : copyLayout) {
 
@@ -318,6 +293,21 @@ public class VisualizationViewerGraph {
 
         }
     }
+    
+    
+    //Преобразут список вершин хромосомы в список ребер для добавления параллельных ребер(без дубликатов ребер)
+    public ArrayList<MyEdge> formEdgesList(LinkedList<Integer> listVerteces) {
+        ArrayList<MyEdge> edgesList = new ArrayList<>();
+        GraphElements.MyEdge e;
+        
+        for (int i = 0; i < listVerteces.size() - 1; i++) {
+            e = graph.findEdge(matrix.getVertexOfIndex(listVerteces.get(i)), matrix.getVertexOfIndex(listVerteces.get(i + 1)));
+            if (!edgesList.contains(e)) {
+                edgesList.add(e);
+            }
+        }
+        return edgesList;
+    }
 
     public void deleteParalEdges() {
         ArrayList<GraphElements.MyEdge> copyLayout = new ArrayList<GraphElements.MyEdge>(layout.getGraph().getEdges());//скопировала массив со всеми ребрами
@@ -336,6 +326,8 @@ public class VisualizationViewerGraph {
                 .forEach(graph::removeVertex);
         chEdgeList = null;
         paintedEdgeslist = null;
+        listOfShortcut = null;
+        
         frame.repaint();
     }
 
@@ -345,6 +337,18 @@ public class VisualizationViewerGraph {
 
     public int getNumColor() {//для раскраски ребра
         return numColor;
+    }
+
+    void setNewRandomGraphMatrix(JTextField textCountVertex, JTextField textFrom, JTextField textBefore, int percentOfEdges) {
+                    matrix = new GenerationMatrix(Integer.parseInt(textCountVertex.getText()), Integer.parseInt(textFrom.getText()), Integer.parseInt(textBefore.getText()), percentOfEdges);
+                    graph = matrix.getGraf();
+                    layout.setGraph(graph);
+                    matrix.printMatrix();
+                    frame.repaint();
+    }
+
+    public void setMatrix(GenerationMatrix matrix) {
+       this.matrix = matrix;
     }
 
     /**
@@ -453,7 +457,10 @@ public class VisualizationViewerGraph {
         public Shape transform(GraphElements.MyVertex i) {
             Ellipse2D circle = new Ellipse2D.Double(-14, -14, 28, 28);
             // in this case, the vertex is twice as large//в 1.5 раза больше
-            if (Integer.parseInt(i.getName()) == Integer.parseInt(s.getText()) || Integer.parseInt(i.getName()) == Integer.parseInt(t.getText())) {
+            if(validationInput.isNonNegativeNumber(s.getText()) && (Integer.parseInt(i.getName()) == Integer.parseInt(s.getText()))) {
+                 return AffineTransform.getScaleInstance(1.5, 1.5).createTransformedShape(circle);
+            }
+            else if(validationInput.isNonNegativeNumber(t.getText()) && (Integer.parseInt(i.getName()) == Integer.parseInt(t.getText()))) {
                 return AffineTransform.getScaleInstance(1.5, 1.5).createTransformedShape(circle);
             } else {
                 return circle;
@@ -539,4 +546,3 @@ public class VisualizationViewerGraph {
         });
     }
 }
-

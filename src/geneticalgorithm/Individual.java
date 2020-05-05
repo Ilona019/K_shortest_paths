@@ -1,5 +1,6 @@
 package geneticalgorithm;
 
+import grapheditor.GenerationMatrix;
 import grapheditor.GraphElements;
 import grapheditor.GraphElements.MyEdge;
 import java.util.ArrayList;
@@ -17,13 +18,12 @@ public class Individual {
     private LinkedList<Integer> chromosome;//1 хромосома
     private int route;
     private boolean fitnessF;
-    private ArrayList<MyEdge> edgesList;
 
     public Individual(LinkedList<Integer> descendantChromosome, GenerationMatrix matrix, int b) {
         chromosome = descendantChromosome;
         route = fitnessFunctionPath(matrix);
         fitnessF = fitnessFunctionWeight(b);
-        formEdgesList(matrix);
+        //formEdgesList(matrix);
     }
 
     public Individual(int countVertex, int s, int t, GenerationMatrix matrix, int b) {
@@ -69,13 +69,13 @@ public class Individual {
         }
         route = fitnessFunctionPath(matrix);
         fitnessF = fitnessFunctionWeight(b);
-        formEdgesList(matrix);
+        //formEdgesList(matrix);
     }
 
     //Конструктор для создания копии объекта
     public Individual(Individual indCopy) {
         chromosome = (LinkedList<Integer>) indCopy.chromosome.clone();
-        edgesList = (ArrayList<MyEdge>) indCopy.getEdgeList().clone();
+        //edgesList = (ArrayList<MyEdge>) indCopy.getEdgeList().clone();
         route = indCopy.getRoute();
         fitnessF = indCopy.getFitnessF();
     }
@@ -154,21 +154,10 @@ public class Individual {
         return -1;
     }
 
-//Преобразут список вершин хромосомы в список ребер для добавления параллельных ребер(без дубликатов ребер)
-    public void formEdgesList(GenerationMatrix m) {
-        edgesList = new ArrayList<>();
-        GraphElements.MyEdge e;
-        for (int i = 0; i < chromosome.size() - 1; i++) {
-            e = m.getGraf().findEdge(m.getVertexOfIndex(chromosome.get(i)), m.getVertexOfIndex(chromosome.get(i + 1)));
-            if (!edgesList.contains(e)) {
-                edgesList.add(e);
-            }
-        }
-    }
 
-    public ArrayList<MyEdge> getEdgeList() {
-        return edgesList;
-    }
+//    public ArrayList<MyEdge> getEdgeList() {
+//        return edgesList;
+//    }
     
     //Заменить фраграмент [indexBegin indexEnd] хромосомы на передаваемый фрагмент списка.
     public void changeChromosome(List<Integer> fragmentList, int indexBegin, int indexEnd){
@@ -221,18 +210,16 @@ public class Individual {
             positionChromosome = 1;
         else
         positionChromosome = (int) (Math.random() * (chromosome.size() - 3)) + 1;
-        System.out.println(positionChromosome);
         do {
             randomVertex = (int) (Math.random() * matrix.getCountVerteces());
         } while (randomVertex == chromosome.get(0) || randomVertex == chromosome.getLast());
-        System.out.println(positionChromosome+" "+ randomVertex);
 
         chromosome.add(positionChromosome, randomVertex);
         removeDublicatesVertex();
         if (isPath(matrix)) {
             route = fitnessFunctionPath(matrix);
             fitnessF = fitnessFunctionWeight(b);
-            formEdgesList(matrix);
+           // formEdgesList(matrix);
 
             System.out.print(printChromosome(matrix));
             System.out.print(" position " + positionChromosome + " replaced " + randomVertex);

@@ -1,5 +1,6 @@
 package geneticalgorithm;
 
+import grapheditor.GenerationMatrix;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -109,7 +110,7 @@ public class Population {
         }
     }
 
-    public String printFile(GenerationMatrix m) {
+    public String convertRoutesToString(GenerationMatrix m) {
         String str = "";
         for (int i = 0; i < population.size(); i++) {
             str += i+")"+ "Route == " + population.get(i).getRoute() + ";\t" + population.get(i).printChromosome(m) + "\n";

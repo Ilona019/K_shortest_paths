@@ -1,6 +1,9 @@
 package main;
 
-import geneticalgorithm.GenerationMatrix;
+import antcolonyalgorithm.Ant;
+import antcolonyalgorithm.AntColonyAlgorithmEditDialog;
+import antcolonyalgorithm.AntColonyOptimisation;
+import grapheditor.GenerationMatrix;
 import geneticalgorithm.GeneticAlgorithm;
 import geneticalgorithm.GeneticAlgorithmEditDialog;
 import geneticalgorithm.Individual;
@@ -11,7 +14,9 @@ import grapheditor.VisualizationViewerGraph;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
@@ -29,7 +34,6 @@ import javafx.scene.text.Font;
  * @author Илона
  */
 public class K_shortcut extends Application {
-//Для вызова понели вывода нажала окно, сбросить окна.
 
     private Font font;
     private Label lk;
@@ -42,9 +46,14 @@ public class K_shortcut extends Application {
     private TextField t;
     private Button btnRun;
     private Button btnGeneticAlgorithm;
+    private Button btnAntColonyAlgorithm;
     private GenerationMatrix matrix;
-    private static Population population;
+    private Population population;
     private VisualizationViewerGraph visGraph;
+    public GeneticAlgorithm gAlg;
+    public AntColonyOptimisation antColony;
+    private ValidateInput validationInput;
+    private ArrayList<LinkedList<Integer>> listRoutes;
 
     @Override
     public void start(Stage primaryStage) {
@@ -52,50 +61,66 @@ public class K_shortcut extends Application {
         primaryStage.setScene(createScene());
         primaryStage.show();
         visGraph = new VisualizationViewerGraph(s, t);
+        listRoutes = new ArrayList();
 
-        ValidateInput validationInput = new ValidateInput(visGraph);
+        validationInput = new ValidateInput(visGraph);
+        visGraph.setValidationInput(validationInput);
 
-        btnGeneticAlgorithm.setOnAction((javafx.event.ActionEvent eventGA) -> {
-            validationInput.checkGeneraParametersTask(s, t, k, b);
-            if (!validationInput.isInputErrors()) {
-                GeneticAlgorithmEditDialog gaDialog = new GeneticAlgorithmEditDialog(visGraph);
+        settingListenersForST();
+        gAlg = new GeneticAlgorithm();
+        btnGeneticAlgorithm.setOnAction((ActionEvent eventGA) -> {
+            if (!validationInput.checkWindowСonditionTask(s, t, k, b)) {
+                GeneticAlgorithmEditDialog gaDialog = new GeneticAlgorithmEditDialog(visGraph, gAlg);
 
                 btnRun = gaDialog.getBtnRun();
-                btnRun.setOnAction((javafx.event.ActionEvent eventRun) -> {
-                    validationInput.checkParametersGeneticAlgorithm(k, s, t, gaDialog.getComboBoxParents(), gaDialog.getComboBoxCrossingTypes(), gaDialog.getComboBoxSelectionTypes(), gaDialog.getNumberPopulation());
-                    if (!validationInput.isInputErrors()) {
-                        visGraph.deleteParalEdges();
-                        for (GraphElements.MyEdge e : visGraph.getGraph().getEdges()) {
-                            if (e.getFlagPaint() == 1) {
-                                e.setFlagPaint(0);
-                            }
-                        }
-                        visGraph.setChEdgeList(null);
-                        visGraph.setPaintedEdgeslist(null);
-                        visGraph.repainFrame();
+                btnRun.setOnAction((ActionEvent eventRun) -> {
+                    if (!validationInput.checkDialogGeneticAlgorithm(k, gaDialog.getComboBoxParents(), gaDialog.getComboBoxCrossingTypes(), gaDialog.getComboBoxSelectionTypes(), gaDialog.getNumberPopulation())) {
+                        resetGraphParameters();
 
                         matrix = new GenerationMatrix(visGraph.getGraph(), s.getText(), t.getText());
+                        visGraph.setMatrix(matrix);
                         performGeneticAlgorithm(gaDialog);
-                        visGraph.addParalEdges();
-                        visGraph.repainFrame();
-                        try (FileWriter writer = new FileWriter("result.txt", false)) {
-                            String text = population.printFile(matrix);
-                            writer.write(text);
-                            writer.append('\n');
-                            writer.flush();
-                            writer.close();
-                        } catch (IOException ex) {
-                            System.out.println(ex.getMessage());
-                        }
+
+                        displayRoutesOnGraph();
+                        
+                        writeResponseToFile(population.convertRoutesToString(matrix));
                     }
                 });
                 gaDialog.getDialog().showAndWait();
             }
         });
 
+        antColony = new AntColonyOptimisation();
+        btnAntColonyAlgorithm.setOnAction((ActionEvent eventACO) -> {
+            if (!validationInput.checkWindowСonditionTask(s, t, k, b)) {
+                AntColonyAlgorithmEditDialog antDialog = new AntColonyAlgorithmEditDialog(visGraph, antColony, k);
+                btnRun = antDialog.getBtnRun();
+                btnRun.setOnAction((ActionEvent eventRun) -> {
+                    if (!validationInput.checkDialogAntColonyOptimization(k, antDialog.getColonySize(), antDialog.getAlpha(), antDialog.getBetta(), antDialog.getEvaporation(), antDialog.getMaxIterations())) {
+                        resetGraphParameters();
+                        matrix = new GenerationMatrix(visGraph.getGraph(), s.getText(), t.getText());
+                        visGraph.setMatrix(matrix);
+                        matrix.printMatrix();
+                        antColony = new AntColonyOptimisation(Integer.parseInt(antDialog.getColonySize().getText()), Integer.parseInt(antDialog.getAlpha().getText()), Integer.parseInt(antDialog.getBetta().getText()), Double.parseDouble(antDialog.getEvaporation().getText()), matrix, Integer.parseInt(antDialog.getMaxIterations().getText()), Integer.parseInt(b.getText()));
+
+                        antColony.startAntOptimization();
+                        formListRoutesFromColonyAnts(antColony.getAntsColonyBest());
+
+                        antDialog.setResult(antColony.getAntsColonyBest().size());
+                        antDialog.setDurationAlgorithm(antColony.getDuration());
+
+                        displayRoutesOnGraph();
+                        
+                        writeResponseToFile(antColony.convertRoutesToString(matrix));
+                    }
+                });
+
+                antDialog.getDialog().showAndWait();
+            }
+        });
+
     }
 
-    //Основной алгоритм
     public void performGeneticAlgorithm(GeneticAlgorithmEditDialog gaDialog) {
         long old = System.currentTimeMillis(); // time
         matrix.printMatrix();
@@ -103,7 +128,6 @@ public class K_shortcut extends Application {
         System.out.println("t " + matrix.getT());
         Individual chromosome;
         population = new Population();
-        visGraph.setPopulation(population);
         int noRes = 0;
         int generationN = 0;//Количество поколений
         RouteComparator myRouteComparator = new RouteComparator();
@@ -114,7 +138,7 @@ public class K_shortcut extends Application {
         }
         System.out.println("1. Вывод первого поколения:");
         population.printPopulation(matrix);//первое поколение
-        GeneticAlgorithm gAlg = new GeneticAlgorithm(matrix, population, gaDialog.getComboBoxParents().getValue(), gaDialog.getComboBoxCrossingTypes().getValue(), gaDialog.getComboBoxSelectionTypes().getValue(), Integer.parseInt(b.getText()), Integer.parseInt(gaDialog.getNumberPopulation().getText()));
+        gAlg = new GeneticAlgorithm(matrix, population, gaDialog.getComboBoxParents().getValue(), gaDialog.getComboBoxCrossingTypes().getValue(), gaDialog.getComboBoxSelectionTypes().getValue(), Integer.parseInt(b.getText()), Integer.parseInt(gaDialog.getNumberPopulation().getText()));
         for (int i = 0; i < population.size(); i++)//Поместили в резерв хромосомы из начальной популяции
         {
             if (population.getAtIndex(i).getFitnessF() && !gAlg.existInReserve(population.getAtIndex(i))) {
@@ -212,24 +236,24 @@ public class K_shortcut extends Application {
             }
         }
         population.setListPopulation(gAlg.getReserveChromosomes());
-        int n;
-        if (noRes == 1) {
-            n = -1;
-
-        } else {
-            n = population.size();
-        }
-
-        n = population.size();
         population.getPopulation().sort(myRouteComparator);
-        population.printPopulation(matrix);
-        for (int i = 0; i < (n - Integer.parseInt(k.getText())); i++) {
-            population.getPopulation().removeLast();
-        }
-
-        System.out.println("GA time work: " + (System.currentTimeMillis() - old) / 1000F + " sec"); // веремя работы генетического алгоритма
+        
+        formListRoutes(population);
         gaDialog.setResult(population.size());
         gaDialog.setNumGenerations(generationN);
+        gaDialog.setDurationAlgorithm((System.currentTimeMillis() - old) / 1000F);
+    }
+    
+    public void writeResponseToFile(String textRoutes) {
+        try (FileWriter writer = new FileWriter("result.txt", false)) {
+            String text = textRoutes;
+            writer.write(text);
+            writer.append('\n');
+            writer.flush();
+            writer.close();
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        }
     }
 
     public static void main(String[] args) {
@@ -258,7 +282,7 @@ public class K_shortcut extends Application {
         lb.setFont(font);
         root.add(lb, 0, 1);
         b = new TextField();
-        b.setText("7");
+        b.setText("100");
         root.add(b, 1, 1);
         ls = new Label("Enter the beginning of the path(first vertex number):\t  s = ");
         ls.setFont(font);
@@ -279,9 +303,68 @@ public class K_shortcut extends Application {
         btnGeneticAlgorithm.setFont(font);
         btnGeneticAlgorithm.setStyle("-fx-text-fill: navy; -fx-border-color: navy; -fx-border-width: 3px; -fx-underline: true; ");
         btnGeneticAlgorithm.setEffect(shadow);
+
+        btnAntColonyAlgorithm = new Button();
+        btnAntColonyAlgorithm.setText("Ant colony algorithm");
+        btnAntColonyAlgorithm.setPadding(new Insets(20, 20, 20, 20));
+        btnAntColonyAlgorithm.setFont(font);
+        btnAntColonyAlgorithm.setStyle("-fx-text-fill: navy; -fx-border-color: navy; -fx-border-width: 3px; -fx-underline: true; ");
+        btnAntColonyAlgorithm.setEffect(shadow);
+
         root.add(btnGeneticAlgorithm, 0, 10);
+        root.add(btnAntColonyAlgorithm, 1, 10);
         Scene scene = new Scene(root, 700, 450);
         return scene;
+    }
+
+    private void settingListenersForST() {
+        s.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (validationInput.isNonNegativeNumber(s.getText())) {
+                visGraph.repainFrame();
+            }
+        });
+
+        t.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (validationInput.isNonNegativeNumber(t.getText())) {
+                visGraph.repainFrame();
+            }
+        });
+
+    }
+
+    private void formListRoutes(Population population) {
+        for (int i = 0; i < population.size(); i++) {
+            listRoutes.add(population.getAtIndex(i).getChromomeStructure());
+        }
+    }
+
+    private void resetGraphParameters() {
+        visGraph.deleteParalEdges();
+
+        for (GraphElements.MyEdge e : visGraph.getGraph().getEdges()) {
+            if (e.getFlagPaint() == 1) {
+                e.setFlagPaint(0);
+            }
+        }
+        visGraph.setChEdgeList(null);
+        visGraph.setPaintedEdgeslist(null);
+        visGraph.setListOfShortcut(null);
+        listRoutes.clear();
+
+        visGraph.repainFrame();
+
+    }
+
+    private void formListRoutesFromColonyAnts(LinkedList<Ant> antsColonyBest) {
+        for (int i = 0; i < antsColonyBest.size(); i++) {
+            listRoutes.add(antsColonyBest.get(i).getRoute());
+        }
+    }
+
+    private void displayRoutesOnGraph() {
+        visGraph.setListOfShortcut(listRoutes);
+        visGraph.addParalEdges(Integer.parseInt(k.getText()));
+        visGraph.repainFrame();
     }
 
 }

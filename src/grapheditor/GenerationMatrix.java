@@ -1,10 +1,15 @@
-package geneticalgorithm;
+package grapheditor;
 
 import edu.uci.ics.jung.graph.SparseMultigraph;
-import grapheditor.GraphElements;
 import grapheditor.GraphElements.MyEdgeFactory;
 import grapheditor.GraphElements.MyVertexFactory;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  *
@@ -18,7 +23,7 @@ public class GenerationMatrix {
     private int s;
     private int t;
 
-  public  GenerationMatrix(SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> graph, String s1, String t1) {
+    public GenerationMatrix(SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> graph, String s1, String t1) {
         this.graph = graph;
         matrix = new int[graph.getVertexCount()][];
         renameV = new HashMap<>();
@@ -35,46 +40,64 @@ public class GenerationMatrix {
             }
         }
     }
-    
-    public GenerationMatrix(int countVertex, String s1, String t1) {
-         matrix = new int[countVertex][];
-         renameV = new HashMap<>();
-         for (int i = 1, l = 1; i < countVertex; i++, l++) {
+
+    public GenerationMatrix(int countVertex, int from, int before, int edgePercent) {
+        matrix = new int[countVertex][];
+        renameV = new HashMap<>();
+        int willEdges = countVertex * (countVertex - 1) * edgePercent / 200;
+        int edgesFullGraph = countVertex * (countVertex - 1) / 2;
+
+        LinkedList<Integer> listWeight = new LinkedList();
+
+        for (int i = 0; i < willEdges; i++) {
+            listWeight.add((int) (Math.random() * (before - from + 1) + from));
+        }
+        if (willEdges < edgesFullGraph) {
+            for (int i = willEdges; i < edgesFullGraph; i++) {
+                listWeight.add(0);
+            }
+        }
+
+        Collections.shuffle(listWeight);
+
+        Iterator iteratorListWeight = listWeight.iterator();
+        for (int i = 1, l = 1; i < countVertex; i++, l++) {
             matrix[i] = new int[l];
 
             for (int j = 0; j < l; j++) {
-                matrix[i][j] = (int) (Math.random() * 100);
-            }          
+                matrix[i][j] = (int) iteratorListWeight.next();
+            }
+
         }
 
         graph = new SparseMultigraph<>();
-                     
+
         //добавление всех вершин
         MyVertexFactory myVertexFactory = new MyVertexFactory();
-           GraphElements.MyVertex newVertex;
-            for(int i = 0; i < countVertex; i++) {
-                newVertex = myVertexFactory.create();
-                graph.addVertex(newVertex);
-            }
-            
-            this.initializeVertex(s1, t1);
-            System.out.println("count ver = "+graph.getVertexCount());
-            
-          //добавление ребра
-          MyEdgeFactory myEdgeFactory = new MyEdgeFactory();
-          for (int i = 1, l = 1; i < countVertex; i++, l++) {
+        GraphElements.MyVertex newVertex;
+        for (int i = 0; i < countVertex; i++) {
+            newVertex = myVertexFactory.create();
+            graph.addVertex(newVertex);
+        }
+
+        this.initializeVertex("0", "4");
+        System.out.println("count ver = " + graph.getVertexCount());
+
+        //добавление ребра
+        MyEdgeFactory myEdgeFactory = new MyEdgeFactory();
+        for (int i = 1, l = 1; i < countVertex; i++, l++) {
             for (int j = 0; j < l; j++) {
-                
-                if(matrix[i][j] != 0) {
-                    graph.addEdge(myEdgeFactory.create(), renameV.get(i),renameV.get(j));
+
+                if (matrix[i][j] != 0) {
+                    graph.addEdge(myEdgeFactory.create(), renameV.get(i), renameV.get(j));
                     myEdgeFactory.setDefaultWeight(matrix[i][j]);
-                }                   
+                }
             }
         }
-          System.out.println("count edge = "+graph.getEdgeCount());
-     }
+        System.out.println("count edge = " + graph.getEdgeCount());
+    }
 
-    private void initializeVertex(String s1, String t1){
+    private void initializeVertex(String s1, String t1) {
         int k = 0;
         for (GraphElements.MyVertex ver : graph.getVertices()) {
             if (ver.getName().equals(s1)) {
@@ -85,8 +108,8 @@ public class GenerationMatrix {
             }
             renameV.put(k++, ver);
         }
-         
-     }
+
+    }
 
     //получить элемент из треугольного массива по индексам строки и столбца;
     public int getWeight(int i, int j) {
@@ -108,6 +131,10 @@ public class GenerationMatrix {
         return t;
     }
 
+    public int[][] getMatrix() {
+        return matrix;
+    }
+
     //вернуть число вершин
     public int getCountVerteces() {
         return graph.getVertexCount();
@@ -117,14 +144,14 @@ public class GenerationMatrix {
     public int getCountEdges() {
         return graph.getEdgeCount();
     }
-    
-    public int getDegreeVertex(int indexVertex){
-            return graph.getNeighborCount(renameV.get(indexVertex));
+
+    public int getDegreeVertex(int indexVertex) {
+        return graph.getNeighborCount(renameV.get(indexVertex));
     }
 
     //вернуть по индексу перенумерованную вершину
-    public GraphElements.MyVertex getVertexOfIndex(int ind) {
-        return renameV.get(ind);
+    public GraphElements.MyVertex getVertexOfIndex(int vertex) {
+        return renameV.get(vertex);
     }
 
     //записать элемент в треугольный массив;
@@ -135,6 +162,31 @@ public class GenerationMatrix {
     //вернуть объект граф
     public SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> getGraf() {
         return graph;
+    }
+
+    //отобрать номера в матрице смежных вершин с данной.
+    public LinkedList<Integer> getNeighbors(int renameVertex) {
+        LinkedList<Integer> list = new LinkedList<>();
+//         System.out.println("Rename input v = "+ renameVertex+" "+renameV.get(renameVertex));
+//         for( int  v=0; v < renameV.size(); v++)
+//         System.out.println("v = "+v+" , "+renameV.get(v));
+
+        Collection<GraphElements.MyVertex> neighbors = graph.getNeighbors(renameV.get(renameVertex));
+
+        for (GraphElements.MyVertex v : neighbors) {
+            list.add(getKey(renameV, v));
+        }
+
+        return list;
+    }
+
+    public <K, V> K getKey(Map<K, V> map, V value) {
+        for (Entry<K, V> entry : map.entrySet()) {
+            if (entry.getValue().equals(value)) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     //вывод матрицы в консоль;
