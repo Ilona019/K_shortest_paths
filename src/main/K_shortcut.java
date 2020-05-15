@@ -136,7 +136,7 @@ public class K_shortcut extends Application {
             population.addChomosome(chromosome);
 
         }
-        System.out.println("1. Вывод первого поколения:");
+        //System.out.println("1. Вывод первого поколения:");
         population.printPopulation(matrix);//первое поколение
         gAlg = new GeneticAlgorithm(matrix, population, gaDialog.getComboBoxParents().getValue(), gaDialog.getComboBoxCrossingTypes().getValue(), gaDialog.getComboBoxSelectionTypes().getValue(), Integer.parseInt(b.getText()), Integer.parseInt(gaDialog.getNumberPopulation().getText()));
         for (int i = 0; i < population.size(); i++)//Поместили в резерв хромосомы из начальной популяции
@@ -148,8 +148,8 @@ public class K_shortcut extends Application {
         if (gAlg.getReserveChromosomes().size() >= Integer.parseInt(k.getText())) {//нашлось решение на первом шаге
             gAlg.printReserveList();
         } else {
-            System.out.println("COUNT GOOD CHROMOSOME=" + population.countGoodChromosome(Integer.parseInt(b.getText())));
-            System.out.println("Reserve начальной популяции:" + gAlg.getReserveChromosomes().size());
+           // System.out.println("COUNT GOOD CHROMOSOME=" + population.countGoodChromosome(Integer.parseInt(b.getText())));
+           // System.out.println("Reserve начальной популяции:" + gAlg.getReserveChromosomes().size());
             gAlg.printReserveList();
 
             while (gAlg.getReserveChromosomes().size() < Integer.parseInt(k.getText())) {
@@ -159,23 +159,23 @@ public class K_shortcut extends Application {
                     noRes = 1;
                     break;
                 }
-                System.out.println("ПОКОЛЕНИЕ НОМЕР:" + generationN);
+                //System.out.println("ПОКОЛЕНИЕ НОМЕР:" + generationN);
                 gAlg.choiceParents();
                 gAlg.crossing();
-                System.out.println("2. После кроссовера, родители и потомки" + generationN);
-                population.printPopulation(matrix);//первое поколение
-                System.out.println("Reserve после скрещивания:" + gAlg.getReserveChromosomes().size());
+                //System.out.println("2. После кроссовера, родители и потомки" + generationN);
+                //population.printPopulation(matrix);//первое поколение
+                //System.out.println("Reserve после скрещивания:" + gAlg.getReserveChromosomes().size());
                 gAlg.printReserveList();
                 gAlg.mutation();
-                System.out.println("3. После мутации. Номер поколения:" + generationN);
-                population.printPopulation(matrix);
-                System.out.println("Reserve после мутации:" + gAlg.getReserveChromosomes().size());
-                gAlg.printReserveList();
+                //System.out.println("3. После мутации. Номер поколения:" + generationN);
+                //population.printPopulation(matrix);
+                //System.out.println("Reserve после мутации:" + gAlg.getReserveChromosomes().size());
+                //gAlg.printReserveList();
                 gAlg.selection();
-                System.out.println("4. После отбора. Номер поколения:" + generationN);
-                population.printPopulation(matrix);
-                System.out.println("Reserve после отбора:" + gAlg.getReserveChromosomes().size());
-                gAlg.printReserveList();
+                //System.out.println("4. После отбора. Номер поколения:" + generationN);
+                //population.printPopulation(matrix);
+                //System.out.println("Reserve после отбора:" + gAlg.getReserveChromosomes().size());
+                //gAlg.printReserveList();
                 Individual replace_ind;
                 int count_replace = 0;//Число замен
                 ArrayList<Integer> vertexDublicate = new ArrayList<>();//список вершин, заменили из резерва
@@ -187,9 +187,9 @@ public class K_shortcut extends Application {
                                 if (replace_ind != null) {
                                     population.replaceChromosomeAtIndex(j, new Individual(replace_ind));//Заменить повторяющийся уникальным для популяции. 
                                     vertexDublicate.add(j);
-                                    System.out.println("Заменили особь j=:" + j + " " + population.getAtIndex(i).printChromosome(matrix));
+                                    //System.out.println("Заменили особь j=:" + j + " " + population.getAtIndex(i).printChromosome(matrix));
                                     count_replace++;
-                                    System.out.println("число замен" + count_replace);
+                                    //System.out.println("число замен" + count_replace);
                                     if (count_replace == gAlg.getReserveChromosomes().size()) {//"кончились" элементы резерва для замены.
                                         break;
                                     }
@@ -201,8 +201,8 @@ public class K_shortcut extends Application {
                         }
                     }
                 }
-                System.out.println("5. После замены одинаковых на запасные");
-                population.printPopulation(matrix);
+                //System.out.println("5. После замены одинаковых на запасные");
+                //opulation.printPopulation(matrix);
 
                 //Замена худщих хромосом из резерва
                 if (count_replace != gAlg.getReserveChromosomes().size()) {
@@ -229,9 +229,9 @@ public class K_shortcut extends Application {
                         }
                     }
                 }
-                System.out.println("Reserve после добавления новых хороших хромосом: " + gAlg.getReserveChromosomes().size());
-                gAlg.printReserveList();
-                System.out.println("COUNT GOOD CHROMOSOME =" + population.countGoodChromosome(Integer.parseInt(b.getText())));
+                //System.out.println("Reserve после добавления новых хороших хромосом: " + gAlg.getReserveChromosomes().size());
+                //gAlg.printReserveList();
+                //System.out.println("COUNT GOOD CHROMOSOME =" + population.countGoodChromosome(Integer.parseInt(b.getText())));
 
             }
         }

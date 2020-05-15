@@ -68,6 +68,8 @@ public class ValidateInput {
             if (!visGraph.getGraph().containsVertex(getVertex(Integer.parseInt(t.getText())))) {
                 errors += "* Please create vertece the end of the path in the graph! There is no such vertex " + Integer.parseInt(t.getText()) + ".\n";
             }
+            else if(Integer.parseInt(s.getText())== Integer.parseInt(t.getText()))
+                  errors += "* Vertces s != t.\n";
         }
         if (visGraph.getGraph().getVertexCount() == 0) {
             errors += "* Please draw a graph!\n";

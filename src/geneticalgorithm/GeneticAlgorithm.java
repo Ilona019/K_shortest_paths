@@ -187,9 +187,9 @@ public class GeneticAlgorithm {
                         {
                             this.addReserveChromosome(currentChromosome);
                         }
-                    System.out.println("Изменение случайного гена Индекс: "+i+" До: "+currentChromosome.getChromomeStructure());
+                    //System.out.println("Изменение случайного гена Индекс: "+i+" До: "+currentChromosome.getChromomeStructure());
                     population.replaceChromosomeAtIndex(i, chromosomeAfterMutation);
-                    System.out.println( "После: "+population.getAtIndex(i).getChromomeStructure());
+                    //System.out.println( "После: "+population.getAtIndex(i).getChromomeStructure());
                     break;
                }
             }
@@ -253,8 +253,8 @@ public class GeneticAlgorithm {
                 } else if(Math.abs(indexBeginFirst - j) > 1 && Math.abs(indexBeginSecond - parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j))) > 1) {
                     indexEndFirst = j;
                     indexEndSecond = parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j));
-                        System.out.println("$$$ Parent1" + parentFirst.printChromosome(matrix) + indexBeginFirst + " " + indexEndFirst);
-                        System.out.println("%%% Parent2" + parentSecond.printChromosome(matrix) + indexBeginSecond + " " + indexEndSecond);
+                        //System.out.println("$$$ Parent1" + parentFirst.printChromosome(matrix) + indexBeginFirst + " " + indexEndFirst);
+                        //System.out.println("%%% Parent2" + parentSecond.printChromosome(matrix) + indexBeginSecond + " " + indexEndSecond);
                         Individual descendantChromosome1 = new Individual(parentFirst);
                         Individual descendantChromosome2 = new Individual(parentSecond);
                         int temp;

@@ -60,7 +60,7 @@ public class Individual {
                 chromosome.add(t); 
                 path = true;
                 removeDublicatesVertex();
-                System.out.println("Новая хромосома - "+ printChromosome(matrix));
+                //System.out.println("Новая хромосома - "+ printChromosome(matrix));
            } else {
                        chromosome.clear();
            
@@ -81,11 +81,11 @@ public class Individual {
     }
     
         public void cutPartChromosome( int startIndex, int endIndex) {
-            System.out.println("Before "+chromosome);
+            //System.out.println("Before "+chromosome);
         for (int k = startIndex, count = 0; endIndex - startIndex != count; count++) {
             chromosome.remove(k);
         }
-         System.out.println(chromosome);
+        // System.out.println(chromosome);
    
     }       
 
@@ -221,8 +221,8 @@ public class Individual {
             fitnessF = fitnessFunctionWeight(b);
            // formEdgesList(matrix);
 
-            System.out.print(printChromosome(matrix));
-            System.out.print(" position " + positionChromosome + " replaced " + randomVertex);
+            //System.out.print(printChromosome(matrix));
+            //System.out.print(" position " + positionChromosome + " replaced " + randomVertex);
             return true;
         }
         return false;

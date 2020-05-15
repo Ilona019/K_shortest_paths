@@ -125,8 +125,8 @@ public class RandomGraphEditDialog  implements ChangeListener {
             btnParametersRandomGraph.addActionListener((ActionEvent e1) -> {
                visThis.clearGraph();
                String errors="";
-                if (!validationInput.isPositiveNumber(textCountVertex.getText())) {
-                   errors += "* You incorrectly input filed 'Count vertex'! It is  positive, integer number.\n";
+                if (!validationInput.isPositiveNumber(textCountVertex.getText()) ||  Integer.parseInt(textCountVertex.getText()) > 500) {
+                   errors += "* You incorrectly input filed 'Count vertex'! It is  positive, integer number <=500.\n";
                 }
                 if(!validationInput.isPositiveNumber(textFrom.getText())){
                     errors += "* You incorrectly input  field 'From'! It is  positive, integer number\n";

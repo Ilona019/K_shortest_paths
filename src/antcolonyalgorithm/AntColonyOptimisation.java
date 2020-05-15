@@ -71,14 +71,14 @@ public class AntColonyOptimisation {
             startTime = System.currentTimeMillis(); // time
                 IntStream.rangeClosed(1, maxIterations)
             .forEach(i -> {
-                System.out.println("Attempt #" + i);
+                //System.out.println("Attempt #" + i);
                run();
             });
          durationAlg = ((System.currentTimeMillis() - startTime)/ 1000F);
-                System.out.println("Result  founded "+antsColonyBest.size()+" routes.");
-                antsColonyBest.sort(new RouteComparator());
-                for(int i=0; i< antsColonyBest.size(); i++)
-                    System.out.println(antsColonyBest.get(i).printRoute(matrix)+" lenght "+antsColonyBest.get(i).getRouteLenght());          
+//                System.out.println("Result  founded "+antsColonyBest.size()+" routes.");
+//                antsColonyBest.sort(new RouteComparator());
+//                for(int i=0; i< antsColonyBest.size(); i++)
+//                    System.out.println(antsColonyBest.get(i).printRoute(matrix)+" lenght "+antsColonyBest.get(i).getRouteLenght());          
                     
     }
     
@@ -203,14 +203,14 @@ public class AntColonyOptimisation {
             }
            // pheromoneMatrix[a.getAtIndexVertex(numberVertex - 1)][a.getAtIndexVertex(0)] += contribution;
         }
-        
-        System.out.println("Matrix pheromone");
-        for(int i = 0 ; i < pheromoneMatrix.length; i++ ) {
-                    for(int j = 0 ; j < pheromoneMatrix.length; j++ ) {
-                        System.out.print(pheromoneMatrix[i][j]+" \t");
-        }
-                   System.out.println();
-        }
+//        
+//        System.out.println("Matrix pheromone");
+//        for(int i = 0 ; i < pheromoneMatrix.length; i++ ) {
+//                    for(int j = 0 ; j < pheromoneMatrix.length; j++ ) {
+//                        System.out.print(pheromoneMatrix[i][j]+" \t");
+//        }
+//                   System.out.println();
+//        }
     }
         
     private void updateListBest() {
