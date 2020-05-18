@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    compile 'net.sf.jung:jung-graph-impl:2.0.1'
+    compile 'net.sf.jung:jung-visualization:2.0.1'
+
+    // https://mvnrepository.com/artifact/io.jenetics/jenetics
+    compile group: 'io.jenetics', name: 'jenetics', version: '5.2.0'
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+}
+
+
+jar {
+    from {
+        configurations.runtime.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    manifest {
+        attributes 'Main-Class': 'main.K_shortcut'
+    }
+
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
