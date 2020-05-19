@@ -1,6 +1,8 @@
 package geneticalgorithm;
 
 import grapheditor.GenerationMatrix;
+import main.ConvertRouteToString;
+
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -8,7 +10,7 @@ import java.util.ListIterator;
  *
  * @author Илона
  */
-public class Population {
+public class Population extends ConvertRouteToString {
 
     private LinkedList<Individual> population;
 
@@ -67,7 +69,6 @@ public class Population {
     public int indexNearbyRoute(int index) {
         int path = population.get(index).getRoute();
         int minDifference = population.get(indexMaxRoute()).getRoute();
-        System.out.println(minDifference);
         int indexNear = index;
         
         for (int i = 0; i < population.size(); i++) {
@@ -83,7 +84,7 @@ public class Population {
     public int countGoodChromosome(int b) {
         int count = 0;
         for (int i = 0; i < population.size(); i++) {
-            if (population.get(i).getFitnessF() == true) {
+            if (population.get(i).getFitnessF()) {
                 count++;
             }
         }
@@ -106,14 +107,14 @@ public class Population {
         Individual currentChr;
         while (iteratorP.hasNext()) {
             currentChr = iteratorP.next();
-            System.out.println(i++ + ")  route == " + currentChr.getRoute() + "\t" + currentChr.printChromosome(m) + "\n (weight < B) ? = " + currentChr.getFitnessF() + "\n");
+            System.out.println(i++ + ")  route == " + currentChr.getRoute() + "\t" + routeToString(m, currentChr.getChromomeStructure()) + "\n (weight < B) ? = " + currentChr.getFitnessF() + "\n");
         }
     }
 
     public String convertRoutesToString(GenerationMatrix m) {
         String str = "";
         for (int i = 0; i < population.size(); i++) {
-            str += i+")"+ "Route == " + population.get(i).getRoute() + ";\t" + population.get(i).printChromosome(m) + "\n";
+            str += i+")"+ "Route == " + population.get(i).getRoute() + ";\t" + routeToString(m, population.get(i).getChromomeStructure()) + "\n";
         }
         return str;
     }

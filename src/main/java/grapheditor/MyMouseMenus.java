@@ -34,7 +34,7 @@ public class MyMouseMenus {
     public static class EdgePropItem extends JMenuItem implements EdgeMenuListener<grapheditor.GraphElements.MyEdge>,
             MenuPointListener {
         GraphElements.MyEdge edge;
-        VisualizationViewer visComp;
+        VisualizationViewer<GraphElements.MyVertex, GraphElements.MyEdge> visComp;
         Point2D point;
         
         @Override
@@ -62,15 +62,15 @@ public class MyMouseMenus {
         }
         
     }
+
     public static class WeightDisplay extends JMenuItem implements EdgeMenuListener<grapheditor.GraphElements.MyEdge> {
         @Override
         public void setEdgeAndView(GraphElements.MyEdge e, VisualizationViewer visComp) {
-            this.setText("Weight " + e + " = " + e.getWeight());
+            this.setText( ""+e);
         }
     }
     
-   
-    
+
     public static class VertexMenu extends JPopupMenu {
         public VertexMenu() {
             super("Vertex Menu");

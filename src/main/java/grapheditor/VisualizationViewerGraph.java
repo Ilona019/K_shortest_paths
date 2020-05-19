@@ -62,21 +62,21 @@ public class VisualizationViewerGraph{
 
     public VisualizationViewerGraph(TextField s, TextField t) {
         this.matrix = null;
-        listOfShortcut = new ArrayList();
+        listOfShortcut = new ArrayList<>();
         this.s = s;
         this.t = t;
         graph = new SparseMultigraph<>();
         frame = new JFrame("Draw graph");
-        layout = new KKLayout(graph);
+        layout = new KKLayout<>(graph);
         layout.setSize(new Dimension(1000, 1000));
         vv = new VisualizationViewer<>(layout);
         
 
         settingsVisualizationGraph();
 
-        EditingModalGraphMouse graphMouse = createGraphMouse();
+        EditingModalGraphMouse<GraphElements.MyVertex, GraphElements.MyEdge> graphMouse = createGraphMouse();
 
-        PopupVertexEdgeMenuMousePlugin myPlugin = new PopupVertexEdgeMenuMousePlugin();
+        PopupVertexEdgeMenuMousePlugin<GraphElements.MyVertex, GraphElements.MyEdge> myPlugin = new PopupVertexEdgeMenuMousePlugin<>();
 
         createPopupMenu(myPlugin);
 
@@ -127,15 +127,15 @@ public class VisualizationViewerGraph{
 }
 
     // Add some popup menus for the edges and vertices to our mouse plugin.
-    private void createPopupMenu(PopupVertexEdgeMenuMousePlugin myPlugin) {
+    private void createPopupMenu(PopupVertexEdgeMenuMousePlugin<GraphElements.MyVertex, GraphElements.MyEdge> myPlugin) {
         JPopupMenu edgeMenu = new MyMouseMenus.EdgeMenu(frame);
         JPopupMenu vertexMenu = new MyMouseMenus.VertexMenu();
         myPlugin.setEdgePopup(edgeMenu);
         myPlugin.setVertexPopup(vertexMenu);
     }
 
-    private EditingModalGraphMouse createGraphMouse() {
-        return new EditingModalGraphMouse(vv.getRenderContext(),
+    private EditingModalGraphMouse<GraphElements.MyVertex, GraphElements.MyEdge> createGraphMouse() {
+        return new EditingModalGraphMouse<>(vv.getRenderContext(),
                 GraphElements.MyVertexFactory.getInstance(),
                 GraphElements.MyEdgeFactory.getInstance());
     }
@@ -145,8 +145,8 @@ public class VisualizationViewerGraph{
         vv.setPreferredSize(new Dimension(800, 650));
         // Show vertex and edge labels
         vv.getRenderContext().setLabelOffset(15);//смешение подписи ребра, чтобы не пересекались
-        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller());
-        vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller());
+        vv.getRenderContext().setVertexLabelTransformer(new ToStringLabeller<>());
+        vv.getRenderContext().setEdgeLabelTransformer(new ToStringLabeller<>());
         vv.getRenderer().getVertexLabelRenderer().setPosition(Renderer.VertexLabel.Position.CNTR);//метку на вершине расположили по центру
         //Add function to update color and stroke size of edges on pressing the run algorithm button
         vv.getRenderContext().setEdgeDrawPaintTransformer(new MyEdgePaintFunction());
@@ -198,7 +198,7 @@ public class VisualizationViewerGraph{
     }
 
     // a menu for changing mouse modes
-    private JMenuBar createMenuBar(EditingModalGraphMouse graphMouse) {
+    private JMenuBar createMenuBar(EditingModalGraphMouse<GraphElements.MyVertex, GraphElements.MyEdge> graphMouse) {
         JMenuBar menuBar = new JMenuBar();
         JMenu modeMenu = graphMouse.getModeMenu();
         modeMenu.setText("Mouse Mode");
@@ -222,7 +222,7 @@ public class VisualizationViewerGraph{
         return graph;
     }
 
-    public Layout getLayout() {
+    public Layout<GraphElements.MyVertex, GraphElements.MyEdge> getLayout() {
         return layout;
     }
      
@@ -322,7 +322,7 @@ public class VisualizationViewerGraph{
         GraphElements.MyVertexFactory.setNullNodeCount();
         GraphElements.MyEdgeFactory.setNullLinkCount();
         //удалить вершины старого графа
-        new ArrayList<>(graph.getVertices()).stream()
+        new ArrayList<>(graph.getVertices())
                 .forEach(graph::removeVertex);
         chEdgeList = null;
         paintedEdgeslist = null;
@@ -340,7 +340,7 @@ public class VisualizationViewerGraph{
     }
 
     void setNewRandomGraphMatrix(JTextField textCountVertex, JTextField textFrom, JTextField textBefore, int percentOfEdges) {
-                    matrix = new GenerationMatrix(Integer.parseInt(textCountVertex.getText()), Integer.parseInt(textFrom.getText()), Integer.parseInt(textBefore.getText()), percentOfEdges);
+                    matrix = new GenerationMatrix(Integer.parseInt(textCountVertex.getText()), Integer.parseInt(textFrom.getText()), Integer.parseInt(textBefore.getText()), percentOfEdges, "0", "4");
                     graph = matrix.getGraf();
                     layout.setGraph(graph);
                     matrix.printMatrix();
@@ -436,7 +436,7 @@ public class VisualizationViewerGraph{
         }
     }
 
-    public class EdgeLabelTransformer implements Transformer<GraphElements.MyEdge, String> {
+    public static class EdgeLabelTransformer implements Transformer<GraphElements.MyEdge, String> {
 
         @Override
         public String transform(GraphElements.MyEdge e) {

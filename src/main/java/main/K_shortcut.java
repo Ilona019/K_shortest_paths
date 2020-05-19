@@ -28,6 +28,7 @@ import javafx.scene.control.Button;
 import javafx.geometry.Insets;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.text.Font;
+import jeneticsga.JeneticsGA;
 
 /**
  *
@@ -44,6 +45,7 @@ public class K_shortcut extends Application {
     private Label lt;
     private TextField s;
     private TextField t;
+    private Button btnJeneticsRun;
     private Button btnRun;
     private Button btnGeneticAlgorithm;
     private Button btnAntColonyAlgorithm;
@@ -51,30 +53,35 @@ public class K_shortcut extends Application {
     private Population population;
     private VisualizationViewerGraph visGraph;
     public GeneticAlgorithm gAlg;
+    public JeneticsGA jeneticsGA;
     public AntColonyOptimisation antColony;
     private ValidateInput validationInput;
     private ArrayList<LinkedList<Integer>> listRoutes;
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.setTitle("General patameters task finding the k shortest paths in a graph");
+        primaryStage.setTitle("General parameters task finding the k shortest paths in a graph");
         primaryStage.setScene(createScene());
         primaryStage.show();
         visGraph = new VisualizationViewerGraph(s, t);
-        listRoutes = new ArrayList();
+        listRoutes = new ArrayList<>();
 
         validationInput = new ValidateInput(visGraph);
         visGraph.setValidationInput(validationInput);
 
         settingListenersForST();
+
         gAlg = new GeneticAlgorithm();
+        jeneticsGA = new JeneticsGA();
         btnGeneticAlgorithm.setOnAction((ActionEvent eventGA) -> {
             if (!validationInput.checkWindowСonditionTask(s, t, k, b)) {
-                GeneticAlgorithmEditDialog gaDialog = new GeneticAlgorithmEditDialog(visGraph, gAlg);
+                GeneticAlgorithmEditDialog gaDialog = new GeneticAlgorithmEditDialog(visGraph, gAlg, jeneticsGA);
 
+                btnJeneticsRun = gaDialog.getJeneticBtn();
                 btnRun = gaDialog.getBtnRun();
+
                 btnRun.setOnAction((ActionEvent eventRun) -> {
-                    if (!validationInput.checkDialogGeneticAlgorithm(k, gaDialog.getComboBoxParents(), gaDialog.getComboBoxCrossingTypes(), gaDialog.getComboBoxSelectionTypes(), gaDialog.getNumberPopulation())) {
+                    if (!validationInput.checkDialogGeneticAlgorithm(k, gaDialog.getNumberPopulation())) {
                         resetGraphParameters();
 
                         matrix = new GenerationMatrix(visGraph.getGraph(), s.getText(), t.getText());
@@ -86,6 +93,29 @@ public class K_shortcut extends Application {
                         writeResponseToFile(population.convertRoutesToString(matrix));
                     }
                 });
+
+
+                btnJeneticsRun.setOnAction((ActionEvent eventRun) -> {
+                            if (!validationInput.checkDialogGeneticAlgorithm(k, gaDialog.getNumberPopulation())) {
+                                resetGraphParameters();
+
+                                matrix = new GenerationMatrix(visGraph.getGraph(), s.getText(), t.getText());
+                                visGraph.setMatrix(matrix);
+
+                                JeneticsGA jga = new JeneticsGA(matrix, Integer.parseInt(gaDialog.getNumberPopulation().getText()), Integer.parseInt(k.getText()), Integer.parseInt(b.getText()), gaDialog.getComboBoxCrossingJenetics().getValue(), gaDialog.getComboBoxMutationTypeJenetics().getValue(), gaDialog.getComboBoxSelectionJenetics().getValue());
+                                JeneticsGA.runAlgorithm();
+
+                                listRoutes = jga.getPopulationChromosomes();
+
+                                gaDialog.setResult(listRoutes.size());
+                                gaDialog.setDurationAlgorithm(jga.getDurationAlg());
+
+                                displayRoutesOnGraph();
+
+                               writeResponseToFile(jga.convertRoutesToString(matrix));
+                            }
+                        }
+                );
                 gaDialog.getDialog().showAndWait();
             }
         });
@@ -122,22 +152,15 @@ public class K_shortcut extends Application {
     }
 
     public void performGeneticAlgorithm(GeneticAlgorithmEditDialog gaDialog) {
-        long old = System.currentTimeMillis(); // time
-        matrix.printMatrix();
-        System.out.println("s " + matrix.getS());
-        System.out.println("t " + matrix.getT());
+        long old = System.currentTimeMillis(); // time start
         Individual chromosome;
         population = new Population();
-        int noRes = 0;
         int generationN = 0;//Количество поколений
         RouteComparator myRouteComparator = new RouteComparator();
         for (int i = 0; i < Integer.parseInt(gaDialog.getNumberPopulation().getText()); i++) {
             chromosome = new Individual(visGraph.getGraph().getVertexCount(), matrix.getS(), matrix.getT(), matrix, Integer.parseInt(b.getText()));
             population.addChomosome(chromosome);
-
         }
-        //System.out.println("1. Вывод первого поколения:");
-        population.printPopulation(matrix);//первое поколение
         gAlg = new GeneticAlgorithm(matrix, population, gaDialog.getComboBoxParents().getValue(), gaDialog.getComboBoxCrossingTypes().getValue(), gaDialog.getComboBoxSelectionTypes().getValue(), Integer.parseInt(b.getText()), Integer.parseInt(gaDialog.getNumberPopulation().getText()));
         for (int i = 0; i < population.size(); i++)//Поместили в резерв хромосомы из начальной популяции
         {
@@ -146,36 +169,16 @@ public class K_shortcut extends Application {
             }
         }
         if (gAlg.getReserveChromosomes().size() >= Integer.parseInt(k.getText())) {//нашлось решение на первом шаге
-            gAlg.printReserveList();
         } else {
-           // System.out.println("COUNT GOOD CHROMOSOME=" + population.countGoodChromosome(Integer.parseInt(b.getText())));
-           // System.out.println("Reserve начальной популяции:" + gAlg.getReserveChromosomes().size());
-            gAlg.printReserveList();
-
             while (gAlg.getReserveChromosomes().size() < Integer.parseInt(k.getText())) {
                 generationN++;
                 if (generationN > 1000) {
-                    System.out.println("На 1000 шаге нашёл " + gAlg.getReserveChromosomes().size() + " различных маршрутов.");
-                    noRes = 1;
                     break;
                 }
-                //System.out.println("ПОКОЛЕНИЕ НОМЕР:" + generationN);
                 gAlg.choiceParents();
                 gAlg.crossing();
-                //System.out.println("2. После кроссовера, родители и потомки" + generationN);
-                //population.printPopulation(matrix);//первое поколение
-                //System.out.println("Reserve после скрещивания:" + gAlg.getReserveChromosomes().size());
-                gAlg.printReserveList();
                 gAlg.mutation();
-                //System.out.println("3. После мутации. Номер поколения:" + generationN);
-                //population.printPopulation(matrix);
-                //System.out.println("Reserve после мутации:" + gAlg.getReserveChromosomes().size());
-                //gAlg.printReserveList();
                 gAlg.selection();
-                //System.out.println("4. После отбора. Номер поколения:" + generationN);
-                //population.printPopulation(matrix);
-                //System.out.println("Reserve после отбора:" + gAlg.getReserveChromosomes().size());
-                //gAlg.printReserveList();
                 Individual replace_ind;
                 int count_replace = 0;//Число замен
                 ArrayList<Integer> vertexDublicate = new ArrayList<>();//список вершин, заменили из резерва
@@ -187,9 +190,7 @@ public class K_shortcut extends Application {
                                 if (replace_ind != null) {
                                     population.replaceChromosomeAtIndex(j, new Individual(replace_ind));//Заменить повторяющийся уникальным для популяции. 
                                     vertexDublicate.add(j);
-                                    //System.out.println("Заменили особь j=:" + j + " " + population.getAtIndex(i).printChromosome(matrix));
                                     count_replace++;
-                                    //System.out.println("число замен" + count_replace);
                                     if (count_replace == gAlg.getReserveChromosomes().size()) {//"кончились" элементы резерва для замены.
                                         break;
                                     }
@@ -201,8 +202,6 @@ public class K_shortcut extends Application {
                         }
                     }
                 }
-                //System.out.println("5. После замены одинаковых на запасные");
-                //opulation.printPopulation(matrix);
 
                 //Замена худщих хромосом из резерва
                 if (count_replace != gAlg.getReserveChromosomes().size()) {
@@ -229,9 +228,6 @@ public class K_shortcut extends Application {
                         }
                     }
                 }
-                //System.out.println("Reserve после добавления новых хороших хромосом: " + gAlg.getReserveChromosomes().size());
-                //gAlg.printReserveList();
-                //System.out.println("COUNT GOOD CHROMOSOME =" + population.countGoodChromosome(Integer.parseInt(b.getText())));
 
             }
         }
@@ -246,11 +242,11 @@ public class K_shortcut extends Application {
     
     public void writeResponseToFile(String textRoutes) {
         try (FileWriter writer = new FileWriter("result.txt", false)) {
-            String text = textRoutes;
+            String text;
+            text = textRoutes;
             writer.write(text);
             writer.append('\n');
             writer.flush();
-            writer.close();
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
         }
@@ -329,7 +325,6 @@ public class K_shortcut extends Application {
                 visGraph.repainFrame();
             }
         });
-
     }
 
     private void formListRoutes(Population population) {

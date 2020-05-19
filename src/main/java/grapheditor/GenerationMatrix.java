@@ -17,7 +17,7 @@ import java.util.Map.Entry;
  */
 public class GenerationMatrix {
 
-    private final int matrix[][];
+    private final int[][] matrix;
     private SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> graph;
     private HashMap<Integer, GraphElements.MyVertex> renameV;
     private int s;
@@ -41,13 +41,13 @@ public class GenerationMatrix {
         }
     }
 
-    public GenerationMatrix(int countVertex, int from, int before, int edgePercent) {
+    public GenerationMatrix(int countVertex, int from, int before, int edgePercent, String s, String t) {
         matrix = new int[countVertex][];
         renameV = new HashMap<>();
         int willEdges = countVertex * (countVertex - 1) * edgePercent / 200;
         int edgesFullGraph = countVertex * (countVertex - 1) / 2;
 
-        LinkedList<Integer> listWeight = new LinkedList();
+        LinkedList<Integer> listWeight = new LinkedList<>();
 
         for (int i = 0; i < willEdges; i++) {
             listWeight.add((int) (Math.random() * (before - from + 1) + from));
@@ -67,9 +67,12 @@ public class GenerationMatrix {
             for (int j = 0; j < l; j++) {
                 matrix[i][j] = (int) iteratorListWeight.next();
             }
-
         }
 
+        createRandomGraph(countVertex, s, t);
+    }
+
+    private  void createRandomGraph(int countVertex, String s, String t){
         graph = new SparseMultigraph<>();
 
         //добавление всех вершин
@@ -80,7 +83,7 @@ public class GenerationMatrix {
             graph.addVertex(newVertex);
         }
 
-        this.initializeVertex("0", "4");
+        this.initializeVertex(s, t);
         System.out.println("count ver = " + graph.getVertexCount());
 
         //добавление ребра
@@ -119,6 +122,16 @@ public class GenerationMatrix {
             return 0;
         }
         return matrix[i][j];
+    }
+
+    public int calculateRouteLength(LinkedList<Integer> route){
+        int length = 0;
+
+        for(int index = 0; index < route.size() - 1; index ++ ){
+            length += getWeight(route.get(index), route.get(index + 1));
+        }
+
+        return length;
     }
 
     //вернуть перенумерованную вершину начала

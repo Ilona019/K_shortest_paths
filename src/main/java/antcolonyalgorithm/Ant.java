@@ -1,13 +1,15 @@
 package antcolonyalgorithm;
 
 import grapheditor.GenerationMatrix;
+import main.ConvertRouteToString;
+
 import java.util.LinkedList;
 
 /**
  *
  * @author Ilona
  */
-public class Ant {
+public class Ant extends ConvertRouteToString {
 
     private LinkedList<Integer> route;
     private boolean visitedVertex[];
@@ -107,14 +109,6 @@ public class Ant {
             strRoute += element + " ";
         }
         return strRoute;
-    }
-
-    public String printRoute(GenerationMatrix m) {
-        String str = "";
-        for (int i = 0; i < route.size(); i++) {
-            str += m.getVertexOfIndex(route.get(i)).getNumberVertex() + "->";
-        }
-        return str;
     }
 
     private void createListOfNeighboringVertices() {

@@ -1,6 +1,8 @@
 package geneticalgorithm;
 
 import grapheditor.GenerationMatrix;
+import main.ConvertRouteToString;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -8,7 +10,7 @@ import java.util.LinkedList;
  *
  * @author Илона
  */
-public class GeneticAlgorithm {
+public class GeneticAlgorithm extends ConvertRouteToString {
 
     private Population population;
     private int[] masPair;
@@ -56,7 +58,7 @@ public class GeneticAlgorithm {
                     if (needDelete == deleted) {
                         break;
                     }
-                    if (population.getPopulation().getLast().fitnessFunctionWeight(b) == false) {
+                    if (!population.getPopulation().getLast().fitnessFunctionWeight(b)) {
                         population.getPopulation().removeLast();//удаляем хромосомы не удовлетворяющие условию путь < B.
                         deleted++;//cчётчик сколько удалили хромосом.
                     }
@@ -158,19 +160,16 @@ public class GeneticAlgorithm {
         }
         for (int i = 0; i < population.size(); i++) {
             currentChromosome = population.getAtIndex(i);
-            //System.out.println( "cur ch = "+i+" "+ currentChromosome.printChromosome(matrix));
             for (int point1 = 1; point1 < currentChromosome.getChromomeStructure().size() - 1; point1++) {
                 
                 
                 if (currentChromosome.isNumberVertex(currentChromosome.getChromomeStructure().get(point1), point1 + 1) != -1) {//есть ли начиная с индекса point1, вершина ch.get_list_chromosome().get(point1)
                     point2 = currentChromosome.isNumberVertex(currentChromosome.getChromomeStructure().get(point1), point1 + 1);
-                    if (!existInReserve(currentChromosome) && currentChromosome.getFitnessF() == true)//сохраним в резерв хорошую хромосому по приспособленности до мутации, если её нет в резерве
+                    if (!existInReserve(currentChromosome) && currentChromosome.getFitnessF())//сохраним в резерв хорошую хромосому по приспособленности до мутации, если её нет в резерве
                     {
                         this.addReserveChromosome(currentChromosome);
                     }
-                    printReserveList();
                     currentChromosome.cutPartChromosome(point1, point2);
-                    printReserveList();
                     currentChromosome.recalculateFitnessFunc(matrix, b);//изменилась длина маршрута и надо пересчитать фитнесс функцию
                   //  currentChromosome.formEdgesList(matrix);
                     if (flag == 1) {
@@ -187,9 +186,7 @@ public class GeneticAlgorithm {
                         {
                             this.addReserveChromosome(currentChromosome);
                         }
-                    //System.out.println("Изменение случайного гена Индекс: "+i+" До: "+currentChromosome.getChromomeStructure());
                     population.replaceChromosomeAtIndex(i, chromosomeAfterMutation);
-                    //System.out.println( "После: "+population.getAtIndex(i).getChromomeStructure());
                     break;
                }
             }
@@ -227,10 +224,10 @@ public class GeneticAlgorithm {
 
     public void printReserveList() {
         for (int i = 0; i < reserveChromosomes.size(); i++) {
-            System.out.println(reserveChromosomes.get(i).printChromosome(matrix) + " ");
+            System.out.println(routeToString(matrix, reserveChromosomes.get(i).getChromomeStructure()) + " ");
         }
     }
-    
+
     public void twoPointCrossover(Individual parent1, Individual parent2) {
         int indexBeginFirst = -1;
         int indexEndFirst;
@@ -253,8 +250,6 @@ public class GeneticAlgorithm {
                 } else if(Math.abs(indexBeginFirst - j) > 1 && Math.abs(indexBeginSecond - parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j))) > 1) {
                     indexEndFirst = j;
                     indexEndSecond = parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j));
-                        //System.out.println("$$$ Parent1" + parentFirst.printChromosome(matrix) + indexBeginFirst + " " + indexEndFirst);
-                        //System.out.println("%%% Parent2" + parentSecond.printChromosome(matrix) + indexBeginSecond + " " + indexEndSecond);
                         Individual descendantChromosome1 = new Individual(parentFirst);
                         Individual descendantChromosome2 = new Individual(parentSecond);
                         int temp;

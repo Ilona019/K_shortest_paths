@@ -44,10 +44,10 @@ public class AntColonyOptimisation {
     //констуртор для запонения полей диалогового окна по умолчанию.
     public AntColonyOptimisation() {
         this.colonySize = 10;
-        this.maxIterations = 5; 
+        this.maxIterations = 10;
         this.alpha = 1;
         this.betta = 3;
-        this.evaporation = 0.1;
+        this.evaporation = 0.4;
         this.b = 5;
     }
     
@@ -61,25 +61,20 @@ public class AntColonyOptimisation {
         this.matrix = matrix;
         this.b = b;
         pheromoneMatrix = new double[numberVertex][numberVertex];
-        probabilities = new HashMap();
+        probabilities = new HashMap<>();
         IntStream.range(0, colonySize)
             .forEach(i -> ants.add(new Ant(numberVertex, matrix)));
-                antsColonyBest = new LinkedList();
+                antsColonyBest = new LinkedList<>();
     }
 
     public void startAntOptimization() {
             startTime = System.currentTimeMillis(); // time
                 IntStream.rangeClosed(1, maxIterations)
             .forEach(i -> {
-                //System.out.println("Attempt #" + i);
                run();
             });
          durationAlg = ((System.currentTimeMillis() - startTime)/ 1000F);
-//                System.out.println("Result  founded "+antsColonyBest.size()+" routes.");
-//                antsColonyBest.sort(new RouteComparator());
-//                for(int i=0; i< antsColonyBest.size(); i++)
-//                    System.out.println(antsColonyBest.get(i).printRoute(matrix)+" lenght "+antsColonyBest.get(i).getRouteLenght());          
-                    
+
     }
     
     private void run(){
@@ -137,7 +132,6 @@ public class AntColonyOptimisation {
             probabilities.entrySet()
                     .stream()
                     .sorted(Map.Entry.comparingByValue());
-                    
 
 
             if (probabilities.isEmpty() && (ant.getCurrentVertex() != matrix.getS())) {
@@ -292,7 +286,7 @@ public class AntColonyOptimisation {
     public String convertRoutesToString(GenerationMatrix m) {
         String str = "";
         for (int i = 0; i < antsColonyBest.size(); i++) {
-            str += i+")"+ "Route == " + antsColonyBest.get(i).getRouteLenght() + ";\t" + antsColonyBest.get(i).printRoute(m) + "\n";
+            str += i+")"+ "Route == " + antsColonyBest.get(i).getRouteLenght() + ";\t" + antsColonyBest.get(i).routeToString(m, antsColonyBest.get(i).getRoute()) + "\n";
         }
         return str;
     }

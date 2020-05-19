@@ -23,50 +23,15 @@ public class Individual {
         chromosome = descendantChromosome;
         route = fitnessFunctionPath(matrix);
         fitnessF = fitnessFunctionWeight(b);
-        //formEdgesList(matrix);
     }
 
     public Individual(int countVertex, int s, int t, GenerationMatrix matrix, int b) {
         chromosome = new LinkedList<>();
-        boolean path = false;//флаг, получился ли путь от s до t?
         if (matrix.getCountVerteces() < 2) {
             return;
         }
 
-        while (!path) {
-        int i = countVertex -1;
-        
-          if(matrix.getCountVerteces() == 2) {
-            i = 1;
-          }
-          
-        int pred = s;
-        chromosome.addFirst(s);
-        Random random = new Random();
-            while (i != 1) {  
-                    int verRandom = random.nextInt(countVertex-1);
-                    if (verRandom != s && verRandom != t && matrix.getWeight(pred, verRandom ) != 0) {
-                        pred = verRandom;
-                        chromosome.add(verRandom);
-                        i--;
-                    }
-                    else if (matrix.getWeight(verRandom, t)!= 0){
-                        break;
-                    }
-            }
-        //Collections.shuffle(chromosome);//переставить случайным образом массив генов.
-                    
-            if (matrix.getWeight(pred, t)!= 0) {//хромосома образует путь
-                chromosome.add(t); 
-                path = true;
-                removeDublicatesVertex();
-                //System.out.println("Новая хромосома - "+ printChromosome(matrix));
-           } else {
-                       chromosome.clear();
-           
-           }
-
-        }
+        chromosome = generateNewChromosome(countVertex, matrix, s, t);
         route = fitnessFunctionPath(matrix);
         fitnessF = fitnessFunctionWeight(b);
         //formEdgesList(matrix);
@@ -75,18 +40,56 @@ public class Individual {
     //Конструктор для создания копии объекта
     public Individual(Individual indCopy) {
         chromosome = (LinkedList<Integer>) indCopy.chromosome.clone();
-        //edgesList = (ArrayList<MyEdge>) indCopy.getEdgeList().clone();
         route = indCopy.getRoute();
         fitnessF = indCopy.getFitnessF();
     }
-    
-        public void cutPartChromosome( int startIndex, int endIndex) {
-            //System.out.println("Before "+chromosome);
+
+    public Individual() {
+    }
+
+    public LinkedList<Integer> generateNewChromosome(int countVertex,GenerationMatrix matrix, int s, int t){
+        LinkedList<Integer> newChromosome = new LinkedList<>();
+        boolean path = false;//флаг, получился ли путь от s до t?
+        while (!path) {
+            int i = countVertex -1;
+
+            if(matrix.getCountVerteces() == 2) {
+                i = 1;
+            }
+
+            int pred = s;
+            newChromosome.addFirst(s);
+            Random random = new Random();
+            while (i != 1) {
+                int verRandom = random.nextInt(countVertex-1);
+                if (verRandom != s && verRandom != t && matrix.getWeight(pred, verRandom ) != 0) {
+                    pred = verRandom;
+                    newChromosome.add(verRandom);
+                    i--;
+                }
+                else if (matrix.getWeight(verRandom, t)!= 0){
+                    break;
+                }
+            }
+            //Collections.shuffle(chromosome);//переставить случайным образом массив генов.
+
+            if (matrix.getWeight(pred, t)!= 0) {//хромосома образует путь
+                newChromosome.add(t);
+                path = true;
+                newChromosome = removeDublicatesVertex(newChromosome);
+            } else {
+                newChromosome.clear();
+
+            }
+
+        }
+        return  newChromosome;
+    }
+
+    public void cutPartChromosome( int startIndex, int endIndex) {
         for (int k = startIndex, count = 0; endIndex - startIndex != count; count++) {
             chromosome.remove(k);
         }
-        // System.out.println(chromosome);
-   
     }       
 
 
@@ -102,14 +105,15 @@ public class Individual {
     }
 
 //Убирать дубликаты вершин, стоящие рядом;   
-    public void removeDublicatesVertex() {
-        for (int j = 1, curSize = chromosome.size(); j < curSize - 2; j++) {
-            if (Objects.equals(chromosome.get(j), chromosome.get(j + 1))) {
-                chromosome.remove(j);
+    public LinkedList<Integer> removeDublicatesVertex(LinkedList<Integer> newChromosome) {
+        for (int j = 1, curSize = newChromosome.size(); j < curSize - 2; j++) {
+            if (Objects.equals(newChromosome.get(j), newChromosome.get(j + 1))) {
+                newChromosome.remove(j);
                 curSize--;
                 j--;
             }
         }
+        return newChromosome;
     }
 
 //Целевая функция - длина маршрута.
@@ -153,11 +157,6 @@ public class Individual {
         }
         return -1;
     }
-
-
-//    public ArrayList<MyEdge> getEdgeList() {
-//        return edgesList;
-//    }
     
     //Заменить фраграмент [indexBegin indexEnd] хромосомы на передаваемый фрагмент списка.
     public void changeChromosome(List<Integer> fragmentList, int indexBegin, int indexEnd){
@@ -215,14 +214,10 @@ public class Individual {
         } while (randomVertex == chromosome.get(0) || randomVertex == chromosome.getLast());
 
         chromosome.add(positionChromosome, randomVertex);
-        removeDublicatesVertex();
+        removeDublicatesVertex(chromosome);
         if (isPath(matrix)) {
             route = fitnessFunctionPath(matrix);
             fitnessF = fitnessFunctionWeight(b);
-           // formEdgesList(matrix);
-
-            //System.out.print(printChromosome(matrix));
-            //System.out.print(" position " + positionChromosome + " replaced " + randomVertex);
             return true;
         }
         return false;
@@ -232,24 +227,12 @@ public class Individual {
         return chromosome;
     }
 
-    public int getOfIndex(int index) {
-        return chromosome.get(index);
-    }
-
     public int getRoute() {
         return this.route;
     }
 
     public boolean getFitnessF() {
         return fitnessF;
-    }
-
-    public String printChromosome(GenerationMatrix m) {
-        String str = "";
-        for (int i = 0; i < chromosome.size(); i++) {
-            str += m.getVertexOfIndex(chromosome.get(i)).getNumberVertex() + "->";
-        }
-        return str;
     }
 
     @Override

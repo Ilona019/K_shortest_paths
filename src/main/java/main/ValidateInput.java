@@ -37,8 +37,8 @@ public class ValidateInput {
         return isInputErrors();
     }
 
-    public boolean checkDialogGeneticAlgorithm(TextField k, ComboBox<String> comboBoxParents, ComboBox<String> comboBoxCrossingTypes, ComboBox<String> comboBoxSelectionTypes, TextField numberPopulation) {
-        checkParametersGeneticAlgorithm(k, comboBoxParents, comboBoxCrossingTypes, comboBoxSelectionTypes, numberPopulation);
+    public boolean checkDialogGeneticAlgorithm(TextField k, TextField numberPopulation) {
+        checkParametersGeneticAlgorithm(k, numberPopulation);
         return isInputErrors();
     }
 
@@ -80,19 +80,10 @@ public class ValidateInput {
         this.message = errors;
     }
 
-    public void checkParametersGeneticAlgorithm(TextField k, ComboBox<String> comboBoxParents, ComboBox<String> comboBoxCrossingTypes, ComboBox<String> comboBoxSelectionTypes, TextField numberPopulation) {
+    public void checkParametersGeneticAlgorithm(TextField k, TextField numberPopulation) {
         String errors = "";
         if (!isPositiveNumber(numberPopulation.getText()) || 2 * Integer.parseInt(k.getText()) > Integer.parseInt(numberPopulation.getText())) {
             errors += " You incorrectly input the N! It is  positive, integer number!\n N > 0 AND N >= " + 2 * Integer.parseInt(k.getText()) + " (2*K).\n";
-        }
-        if (!isComboBox(comboBoxParents)) {
-            errors += "* You didn't choose the operator of choice of the parents.\n";
-        }
-        if (!isComboBox(comboBoxCrossingTypes)) {
-            errors += "* You didn't choose the crossing type.\n";
-        }
-        if (!isComboBox(comboBoxSelectionTypes)) {
-            errors += "* You didn't choose the selection type.\n";
         }
         this.message = errors;
     }

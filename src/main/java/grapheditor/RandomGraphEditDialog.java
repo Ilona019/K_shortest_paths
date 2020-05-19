@@ -37,7 +37,7 @@ public class RandomGraphEditDialog  implements ChangeListener {
     private RandomGraphEditDialog randomGraphEditDialog;
     
     RandomGraphEditDialog(){
-        this.countVertex = 10;
+        this.countVertex = 20;
         this.percentOfEdges  = 60;
         this.from = 1;
         this.before = 100;

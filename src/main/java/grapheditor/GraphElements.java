@@ -108,9 +108,8 @@ public class GraphElements {
 
         public GraphElements.MyVertex create() {
             String name = "" + nodeCount++;
-            MyVertex v = new MyVertex(name);
 
-            return v;
+            return new MyVertex(name);
         }
 
         public static void setNullNodeCount() {

@@ -14,10 +14,10 @@ import static javax.swing.SwingConstants.TRAILING;
 
 public class EdgePropertyDialog extends javax.swing.JDialog {
     GraphElements.MyEdge edge;
-    VisualizationViewer visComp;
+    VisualizationViewer<GraphElements.MyVertex, GraphElements.MyEdge> visComp;
     
     /** Creates new form EdgePropertyDialog */
-    public EdgePropertyDialog(java.awt.Frame parent, GraphElements.MyEdge edge,  VisualizationViewer visComp) {
+    public EdgePropertyDialog(java.awt.Frame parent, GraphElements.MyEdge edge,  VisualizationViewer<GraphElements.MyVertex, GraphElements.MyEdge> visComp) {
         super(parent, true);
         initComponents();
         this.edge = edge;
