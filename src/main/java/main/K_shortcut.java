@@ -81,7 +81,7 @@ public class K_shortcut extends Application {
                 btnRun = gaDialog.getBtnRun();
 
                 btnRun.setOnAction((ActionEvent eventRun) -> {
-                    if (!validationInput.checkDialogGeneticAlgorithm(k, gaDialog.getNumberPopulation())) {
+                    if (!validationInput.checkDialogGeneticAlgorithm(k, gaDialog.getNumberPopulation(), gaDialog.getMutationProbability())) {
                         resetGraphParameters();
 
                         matrix = new GenerationMatrix(visGraph.getGraph(), s.getText(), t.getText());
@@ -96,19 +96,20 @@ public class K_shortcut extends Application {
 
 
                 btnJeneticsRun.setOnAction((ActionEvent eventRun) -> {
-                            if (!validationInput.checkDialogGeneticAlgorithm(k, gaDialog.getNumberPopulation())) {
+                            if (!validationInput.checkDialogGeneticAlgorithm(k, gaDialog.getNumberPopulation(), gaDialog.getMutationProbability())) {
                                 resetGraphParameters();
 
                                 matrix = new GenerationMatrix(visGraph.getGraph(), s.getText(), t.getText());
                                 visGraph.setMatrix(matrix);
 
-                                JeneticsGA jga = new JeneticsGA(matrix, Integer.parseInt(gaDialog.getNumberPopulation().getText()), Integer.parseInt(k.getText()), Integer.parseInt(b.getText()), gaDialog.getComboBoxCrossingJenetics().getValue(), gaDialog.getComboBoxMutationTypeJenetics().getValue(), gaDialog.getComboBoxSelectionJenetics().getValue());
+                                JeneticsGA jga = new JeneticsGA(matrix, Integer.parseInt(gaDialog.getNumberPopulation().getText()), Integer.parseInt(k.getText()), Integer.parseInt(b.getText()), gaDialog.getComboBoxCrossingJenetics().getValue(), gaDialog.getComboBoxMutationTypeJenetics().getValue(), gaDialog.getComboBoxSelectionJenetics().getValue(), Double.parseDouble(gaDialog.getMutationProbability().getText()));
                                 JeneticsGA.runAlgorithm();
 
                                 listRoutes = jga.getPopulationChromosomes();
 
                                 gaDialog.setResult(listRoutes.size());
                                 gaDialog.setDurationAlgorithm(jga.getDurationAlg());
+                                gaDialog.setNumGenerations(jga.numberGeneration());
 
                                 displayRoutesOnGraph();
 
@@ -130,7 +131,6 @@ public class K_shortcut extends Application {
                         resetGraphParameters();
                         matrix = new GenerationMatrix(visGraph.getGraph(), s.getText(), t.getText());
                         visGraph.setMatrix(matrix);
-                        matrix.printMatrix();
                         antColony = new AntColonyOptimisation(Integer.parseInt(antDialog.getColonySize().getText()), Integer.parseInt(antDialog.getAlpha().getText()), Integer.parseInt(antDialog.getBetta().getText()), Double.parseDouble(antDialog.getEvaporation().getText()), matrix, Integer.parseInt(antDialog.getMaxIterations().getText()), Integer.parseInt(b.getText()));
 
                         antColony.startAntOptimization();
@@ -161,7 +161,7 @@ public class K_shortcut extends Application {
             chromosome = new Individual(visGraph.getGraph().getVertexCount(), matrix.getS(), matrix.getT(), matrix, Integer.parseInt(b.getText()));
             population.addChomosome(chromosome);
         }
-        gAlg = new GeneticAlgorithm(matrix, population, gaDialog.getComboBoxParents().getValue(), gaDialog.getComboBoxCrossingTypes().getValue(), gaDialog.getComboBoxSelectionTypes().getValue(), Integer.parseInt(b.getText()), Integer.parseInt(gaDialog.getNumberPopulation().getText()));
+        gAlg = new GeneticAlgorithm(matrix, population, gaDialog.getComboBoxParents().getValue(), gaDialog.getComboBoxCrossingTypes().getValue(), gaDialog.getComboBoxMutationTypes().getValue(), gaDialog.getComboBoxSelectionTypes().getValue(), Integer.parseInt(b.getText()), Integer.parseInt(gaDialog.getNumberPopulation().getText()), Double.parseDouble(gaDialog.getMutationProbability().getText()));
         for (int i = 0; i < population.size(); i++)//Поместили в резерв хромосомы из начальной популяции
         {
             if (population.getAtIndex(i).getFitnessF() && !gAlg.existInReserve(population.getAtIndex(i))) {
@@ -309,8 +309,7 @@ public class K_shortcut extends Application {
 
         root.add(btnGeneticAlgorithm, 0, 10);
         root.add(btnAntColonyAlgorithm, 1, 10);
-        Scene scene = new Scene(root, 700, 450);
-        return scene;
+        return new Scene(root, 700, 450);
     }
 
     private void settingListenersForST() {

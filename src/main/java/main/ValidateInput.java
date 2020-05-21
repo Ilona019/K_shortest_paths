@@ -7,7 +7,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 
 /**
- *
  * @author Ilona
  */
 public class ValidateInput {
@@ -37,8 +36,8 @@ public class ValidateInput {
         return isInputErrors();
     }
 
-    public boolean checkDialogGeneticAlgorithm(TextField k, TextField numberPopulation) {
-        checkParametersGeneticAlgorithm(k, numberPopulation);
+    public boolean checkDialogGeneticAlgorithm(TextField k, TextField numberPopulation, TextField probability) {
+        checkParametersGeneticAlgorithm(k, numberPopulation, probability);
         return isInputErrors();
     }
 
@@ -67,9 +66,8 @@ public class ValidateInput {
         } else {
             if (!visGraph.getGraph().containsVertex(getVertex(Integer.parseInt(t.getText())))) {
                 errors += "* Please create vertece the end of the path in the graph! There is no such vertex " + Integer.parseInt(t.getText()) + ".\n";
-            }
-            else if(Integer.parseInt(s.getText())== Integer.parseInt(t.getText()))
-                  errors += "* Vertces s != t.\n";
+            } else if (Integer.parseInt(s.getText()) == Integer.parseInt(t.getText()))
+                errors += "* Vertces s != t.\n";
         }
         if (visGraph.getGraph().getVertexCount() == 0) {
             errors += "* Please draw a graph!\n";
@@ -80,10 +78,13 @@ public class ValidateInput {
         this.message = errors;
     }
 
-    public void checkParametersGeneticAlgorithm(TextField k, TextField numberPopulation) {
+    public void checkParametersGeneticAlgorithm(TextField k, TextField numberPopulation, TextField probability) {
         String errors = "";
         if (!isPositiveNumber(numberPopulation.getText()) || 2 * Integer.parseInt(k.getText()) > Integer.parseInt(numberPopulation.getText())) {
             errors += " You incorrectly input the N! It is  positive, integer number!\n N > 0 AND N >= " + 2 * Integer.parseInt(k.getText()) + " (2*K).\n";
+        }
+        if (!isProbability(probability.getText())) {
+            errors += "You incorrectly input the Probability! 0 <=p <= 1";
         }
         this.message = errors;
     }
@@ -99,7 +100,7 @@ public class ValidateInput {
         if (!isNonNegativeNumber(betta.getText())) {
             errors += "* You incorrectly input the betta. It is  non negative, integer number!\n";
         }
-        if ((!isDouble(evaporation.getText()) && !isZepoOrOne(evaporation.getText())) || !isEvaporation(evaporation.getText())) {
+        if ((!isDouble(evaporation.getText()) && !isZepoOrOne(evaporation.getText())) || !isIncludedInterval(evaporation.getText(), 0, 1)) {
             errors += "*0 <= Evaporation < =1.\n";
         }
         if (!isPositiveNumber(maxIterations.getText())) {
@@ -120,52 +121,31 @@ public class ValidateInput {
     }
 
     private boolean isComboBox(ComboBox cb) {
-        if (cb.getValue() == null) {
-            return false;
-        }
-        return true;
+        return cb.getValue() != null;
     }
 
     public boolean isPositiveNumber(String text) {
-        if (!text.matches("[\\+]?[1-9][0-9]*")) {
-            return false;
-        }
-        return true;
+        return text.matches("[\\+]?[1-9][0-9]*");
     }
 
     public boolean isDouble(String text) {
-        if (!text.matches("[\\+]?[0-9]\\.[0-9]*")) {
-            return false;
-        }
-        return true;
+        return text.matches("[\\+]?[0-9]\\.[0-9]*");
     }
 
     public boolean isZepoOrOne(String text) {
-        if (!text.matches("[0-1]")) {
-            return false;
-        }
-        return true;
+        return text.matches("[0-1]");
     }
 
     public boolean isNonNegativeNumber(String text) {
-        if (!text.matches("[\\+]?[0-9]+")) {
-            return false;
-        }
-        return true;
+        return text.matches("[\\+]?[0-9]+");
     }
 
     public boolean isVertex(String text) {
-        if (!text.matches("0") && !text.matches("[1-9][0-9]*")) {
-            return false;
-        }
-        return true;
+        return text.matches("0") || text.matches("[1-9][0-9]*");
     }
 
-    public boolean isEvaporation(String text) {
-        if (Double.parseDouble(text) >= 0 && Double.parseDouble(text) <= 1) {
-            return true;
-        }
-        return false;
+    public boolean isIncludedInterval(String text, double leftBorder, double rightBorder) {
+        return Double.parseDouble(text) >= leftBorder && Double.parseDouble(text) <= rightBorder;
     }
 
     public void showMessage(String s) {
@@ -176,5 +156,9 @@ public class ValidateInput {
         alert.setResizable(true);
         alert.getDialogPane().setPrefSize(380, 300);
         alert.showAndWait();
+    }
+
+    public boolean isProbability(String text) {
+        return (isDouble(text) || isZepoOrOne(text)) && isIncludedInterval(text, 0, 1);
     }
 }

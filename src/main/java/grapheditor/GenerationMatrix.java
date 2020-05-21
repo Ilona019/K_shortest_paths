@@ -60,7 +60,7 @@ public class GenerationMatrix {
 
         Collections.shuffle(listWeight);
 
-        Iterator iteratorListWeight = listWeight.iterator();
+        Iterator<Integer> iteratorListWeight = listWeight.iterator();
         for (int i = 1, l = 1; i < countVertex; i++, l++) {
             matrix[i] = new int[l];
 
@@ -84,7 +84,6 @@ public class GenerationMatrix {
         }
 
         this.initializeVertex(s, t);
-        System.out.println("count ver = " + graph.getVertexCount());
 
         //добавление ребра
         MyEdgeFactory myEdgeFactory = new MyEdgeFactory();
@@ -97,7 +96,6 @@ public class GenerationMatrix {
                 }
             }
         }
-        System.out.println("count edge = " + graph.getEdgeCount());
     }
 
     private void initializeVertex(String s1, String t1) {
@@ -180,9 +178,6 @@ public class GenerationMatrix {
     //отобрать номера в матрице смежных вершин с данной.
     public LinkedList<Integer> getNeighbors(int renameVertex) {
         LinkedList<Integer> list = new LinkedList<>();
-//         System.out.println("Rename input v = "+ renameVertex+" "+renameV.get(renameVertex));
-//         for( int  v=0; v < renameV.size(); v++)
-//         System.out.println("v = "+v+" , "+renameV.get(v));
 
         Collection<GraphElements.MyVertex> neighbors = graph.getNeighbors(renameV.get(renameVertex));
 

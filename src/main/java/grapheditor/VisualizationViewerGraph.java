@@ -343,7 +343,6 @@ public class VisualizationViewerGraph{
                     matrix = new GenerationMatrix(Integer.parseInt(textCountVertex.getText()), Integer.parseInt(textFrom.getText()), Integer.parseInt(textBefore.getText()), percentOfEdges, "0", "4");
                     graph = matrix.getGraf();
                     layout.setGraph(graph);
-                    matrix.printMatrix();
                     frame.repaint();
     }
 

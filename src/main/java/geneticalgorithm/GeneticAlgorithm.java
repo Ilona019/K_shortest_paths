@@ -1,6 +1,7 @@
 package geneticalgorithm;
 
 import grapheditor.GenerationMatrix;
+import io.jenetics.Chromosome;
 import main.ConvertRouteToString;
 
 import java.util.ArrayList;
@@ -16,27 +17,33 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     private int[] masPair;
     private ChoiceOfParents choiceParents;//Тип оператора отбора родителей.
     private CrossingType crossingType;//Тип скрещивания.
+    private MutationType mutationType;
     private SelectionType selectionType;//Тип селекции.
     private GenerationMatrix matrix;
     private int b;
     private int n;
     private LinkedList<Individual> reserveChromosomes;
+    private double mutationProbability;
     
     public GeneticAlgorithm() {
-        this.choiceParents = ChoiceOfParents.valueOf("Panmixia".toUpperCase().replace(' ', '_'));
-        this.crossingType = CrossingType.valueOf("Single point crossover".toUpperCase().replace(' ', '_'));
-        this.selectionType = SelectionType.valueOf("Elite".toUpperCase().replace(' ', '_'));
+        this.choiceParents = ChoiceOfParents.PANMIXIA;
+        this.crossingType = CrossingType.SINGLE_POINT_CROSSOVER;
+        this.mutationType = MutationType.UNIFORM;
+        this.selectionType = SelectionType.ELITE;
         this.n = 20;
+        mutationProbability = 0.5;
     }
 
-    public GeneticAlgorithm(GenerationMatrix matrix, Population population, String choiceParents, String crossingType, String selectionType, int b, int n) {
+    public GeneticAlgorithm(GenerationMatrix matrix, Population population, String choiceParents, String crossingType, String mutationType, String selectionType, int b, int n, double mutationProbability) {
         this.matrix = matrix;
  
         this.population = population;
         masPair = new int[2 * population.size()];
         this.choiceParents = ChoiceOfParents.valueOf(choiceParents.replace(' ', '_'));
         this.crossingType = CrossingType.valueOf(crossingType.replace(' ', '_'));
+        this.mutationType = MutationType.valueOf(mutationType.replace(' ', '_'));
         this.selectionType = SelectionType.valueOf(selectionType.replace(' ', '_'));
+        this.mutationProbability = mutationProbability;
         this.b = b;
         this.n = n;
         reserveChromosomes = new LinkedList<>();
@@ -45,8 +52,8 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     public enum SelectionType {
         ELITE
     }
-    //Оператор селекции, отбор в новую популяцию.
 
+    //Оператор селекции, отбор в новую популяцию.
     public void selection() {
         switch (selectionType) {
             case ELITE:
@@ -59,7 +66,7 @@ public class GeneticAlgorithm extends ConvertRouteToString {
                         break;
                     }
                     if (!population.getPopulation().getLast().fitnessFunctionWeight(b)) {
-                        population.getPopulation().removeLast();//удаляем хромосомы не удовлетворяющие условию путь < B.
+                        population.getPopulation().removeLast();//удаляем хромосомы не удовлетворяющие условию путь <= B.
                         deleted++;//cчётчик сколько удалили хромосом.
                     }
 
@@ -82,8 +89,8 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     public enum ChoiceOfParents {
         PANMIXIA, INBREEDING, OUTBREEDING
     }
-    //Выбор родителей, разбиение на пары.
 
+    //Выбор родителей, разбиение на пары.
     public void choiceParents() {
         switch (choiceParents) {
             case PANMIXIA://Оба родителя выбираются случайно.
@@ -109,11 +116,11 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     public enum CrossingType {
         SINGLE_POINT_CROSSOVER, TWO_POINT_CROSSOVER
     }
-    //Оператор скрещивания родителей.
 
+    //Оператор скрещивания родителей.
     public void crossing() {
         Individual indMin, indMax;//по длине хромосомы
-        ArrayList<Individual> arr = new ArrayList<>();
+        ArrayList<Individual> arr;
         int point1 = -2;
         int point2 = -2;//точки разрыва
         switch (crossingType) {
@@ -145,12 +152,36 @@ public class GeneticAlgorithm extends ConvertRouteToString {
         }
     }
 }
-    
+
+enum MutationType {
+    UNIFORM
+}
+
     //Оператор мутации потомков.
     public void mutation() {
-        Individual currentChromosome;
-                   
-                   
+        switch (mutationType) {
+            case UNIFORM:
+                Individual currentChromosome;
+
+                for (int i = 0; i < population.size(); i++) {
+                    currentChromosome = population.getAtIndex(i);
+
+                    Individual chromosomeAfterMutation;
+                    int j = 0;
+
+                    while (j++ < 3) {
+                        chromosomeAfterMutation = new Individual(currentChromosome);
+                        if (chromosomeAfterMutation.mutation(matrix, b, mutationProbability)) {
+                            shortensChromosome(chromosomeAfterMutation);
+                            population.replaceChromosomeAtIndex(i, chromosomeAfterMutation);
+                            break;
+                        }
+                    }
+                }
+        }
+    }
+
+    public void shortensChromosome(Individual ind) {
         int point2;//индекс эквивалентной вершины
         int flag;
         if (reserveChromosomes.isEmpty()) {
@@ -158,39 +189,23 @@ public class GeneticAlgorithm extends ConvertRouteToString {
         } else {
             flag = 1;
         }
-        for (int i = 0; i < population.size(); i++) {
-            currentChromosome = population.getAtIndex(i);
-            for (int point1 = 1; point1 < currentChromosome.getChromomeStructure().size() - 1; point1++) {
-                
-                
-                if (currentChromosome.isNumberVertex(currentChromosome.getChromomeStructure().get(point1), point1 + 1) != -1) {//есть ли начиная с индекса point1, вершина ch.get_list_chromosome().get(point1)
-                    point2 = currentChromosome.isNumberVertex(currentChromosome.getChromomeStructure().get(point1), point1 + 1);
-                    if (!existInReserve(currentChromosome) && currentChromosome.getFitnessF())//сохраним в резерв хорошую хромосому по приспособленности до мутации, если её нет в резерве
-                    {
-                        this.addReserveChromosome(currentChromosome);
-                    }
-                    currentChromosome.cutPartChromosome(point1, point2);
-                    currentChromosome.recalculateFitnessFunc(matrix, b);//изменилась длина маршрута и надо пересчитать фитнесс функцию
-                  //  currentChromosome.formEdgesList(matrix);
-                    if (flag == 1) {
-                        break;
-                    }
+        for (int point1 = 1; point1 < ind.getChromomeStructure().size() - 1; point1++) {
+
+            if (ind.isNumberVertex(ind.getChromomeStructure().get(point1), point1 + 1) != -1) {//есть ли начиная с индекса point1, вершина ch.get_list_chromosome().get(point1)
+                point2 = ind.isNumberVertex(ind.getChromomeStructure().get(point1), point1 + 1);
+                if (!existInReserve(ind) && ind.getFitnessF())//сохраним в резерв хорошую хромосому по приспособленности до мутации, если её нет в резерве
+                {
+                    this.addReserveChromosome(new Individual(ind));
+                }
+
+                ind.cutPartChromosome(point1, point2);
+                ind.recalculateFitnessFunc(matrix, b);//изменилась длина маршрута и надо пересчитать фитнесс функцию
+                if (flag == 1) {
+                    break;
                 }
             }
-            Individual chromosomeAfterMutation;
-            int j = 0;
-            while(j++ < 3){
-               chromosomeAfterMutation = new Individual(currentChromosome);
-               if( chromosomeAfterMutation.mutation(matrix, b)) {
-                        if (currentChromosome.getFitnessF() == true &&!existInReserve(currentChromosome))
-                        {
-                            this.addReserveChromosome(currentChromosome);
-                        }
-                    population.replaceChromosomeAtIndex(i, chromosomeAfterMutation);
-                    break;
-               }
-            }
         }
+
     }
 
     public LinkedList<Individual> getReserveChromosomes() {
@@ -243,7 +258,7 @@ public class GeneticAlgorithm extends ConvertRouteToString {
             parentSecond = parent1;
         }
         for (int j = 1; j < parentFirst.getChromomeStructure().size() - 1; j++) {
-            if (parentSecond.getChromomeStructure().contains(parentFirst.getChromomeStructure().get(j)) == true) {
+            if (parentSecond.getChromomeStructure().contains(parentFirst.getChromomeStructure().get(j))) {
                 if (indexBeginSecond == -1) {
                     indexBeginFirst = j;
                     indexBeginSecond = parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j));
@@ -287,13 +302,25 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     public String getСrossingType() {
         return crossingType.toString().replace('_', ' ');
     }
+
+    public String getMutationType() {
+        return mutationType.toString().replace('_', ' ');
+    }
     
     public String getChoiceParents() {
         return choiceParents.toString().replace('_', ' ');
     }
-    
+
+    public double getMutationProbability() {
+        return mutationProbability;
+    }
+
     public void setN(int n) {
          this.n = n;
+    }
+
+    public void  setMutationProbability(double probability) {
+        mutationProbability = probability;
     }
     
     public void setSelectionType(String selectionType) {
@@ -302,6 +329,10 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     
     public void setСrossingType(String crossingType) {
         this.crossingType =  CrossingType.valueOf(crossingType.toUpperCase().replace(' ', '_'));
+    }
+
+    public void setMutationType(String mutationType) {
+        this.mutationType =  MutationType.valueOf(mutationType.toUpperCase().replace(' ', '_'));
     }
     
     public void setChoiceParents(String choiceParents) {
