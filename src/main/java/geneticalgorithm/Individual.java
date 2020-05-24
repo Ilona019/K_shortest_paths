@@ -207,7 +207,22 @@ public class Individual {
             }
         }
 
-        //   вставить на случайную позицию вершину
+        insertRandomVerteces(matrix);
+        removeDublicatesVertex(chromosome);
+
+        if (isPath(matrix)) {
+            route = fitnessFunctionPath(matrix);
+            fitnessF = fitnessFunctionWeight(b);
+            return true;
+        }
+        return false;
+    }
+
+    //   вставить на случайную позицию вершину
+    private void insertRandomVerteces(GenerationMatrix matrix) {
+        int randomVertex;
+        int positionChromosome;
+
         if (chromosome.size() == 2)
             positionChromosome = 1;
         else
@@ -217,16 +232,8 @@ public class Individual {
         } while (randomVertex == chromosome.get(0) || randomVertex == chromosome.getLast());
 
         chromosome.add(positionChromosome, randomVertex);
-
-
-        removeDublicatesVertex(chromosome);
-        if (isPath(matrix)) {
-            route = fitnessFunctionPath(matrix);
-            fitnessF = fitnessFunctionWeight(b);
-            return true;
-        }
-        return false;
     }
+
 
     public LinkedList<Integer> getChromomeStructure() {
         return chromosome;

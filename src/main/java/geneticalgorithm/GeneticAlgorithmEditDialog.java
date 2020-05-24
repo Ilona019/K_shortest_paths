@@ -20,7 +20,6 @@ import jeneticsga.JeneticsGA;
 import main.ValidateInput;
 
 /**
- *
  * @author Илона
  */
 public class GeneticAlgorithmEditDialog {
@@ -50,7 +49,7 @@ public class GeneticAlgorithmEditDialog {
     private ValidateInput validationInput;
     private GeneticAlgorithm gAlg;
     private JeneticsGA jeneticsGA;
-    
+
 
     public GeneticAlgorithmEditDialog(VisualizationViewerGraph visGraph, GeneticAlgorithm gAlg, JeneticsGA jeneticsGA) {
         this.gAlg = gAlg;
@@ -66,8 +65,8 @@ public class GeneticAlgorithmEditDialog {
         dialog.getDialogPane().getButtonTypes().add(buttonTypeCancel);
         dialog.getDialogPane().setContent(root);
         validationInput = new ValidateInput(visGraph);
-        
-    dialog.setResultConverter((ButtonType b) -> {
+
+        dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
                 if (validationInput.isPositiveNumber(numberPopulation.getText()) && validationInput.isProbability(mutationProbability.getText())) {
                     handleOk();
@@ -85,7 +84,7 @@ public class GeneticAlgorithmEditDialog {
         root.setAlignment(Pos.CENTER);
         root.setHgap(20);
         root.setVgap(20);
-        font = Font.font("TimesRoman",FontWeight.BOLD, 15);
+        font = Font.font("TimesRoman", FontWeight.BOLD, 15);
 
         createLabelsOperators();
         createMyComboBoxOperators();
@@ -93,13 +92,13 @@ public class GeneticAlgorithmEditDialog {
 
         DropShadow shadow = new DropShadow();
         btnRun = new Button();
-        btnRun.setText("Run algorithm");
+        btnRun.setText("Run my GA");
         btnRun.setPadding(new Insets(10, 20, 10, 20));
         btnRun.setFont(font);
         btnRun.setStyle("-fx-text-fill: navy; -fx-border-color: navy; -fx-border-width: 3px; -fx-underline: true; ");
         btnRun.setEffect(shadow);
 
-        btnJenetics = new Button("Run jenetics algorithm");
+        btnJenetics = new Button("Run GA with Jenetics");
         btnJenetics.setPadding(new Insets(10, 20, 10, 20));
         btnJenetics.setFont(font);
         btnJenetics.setStyle("-fx-text-fill: navy; -fx-border-color: navy; -fx-border-width: 3px; -fx-underline: true; ");
@@ -130,7 +129,7 @@ public class GeneticAlgorithmEditDialog {
         lProbability = new Label("Probability");
         lProbability.setMinWidth(100);
         lProbability.setFont(font);
-        root.add(lProbability, 3,0);
+        root.add(lProbability, 3, 0);
         lparents = new Label("Choice of the parents: ");
         lparents.setFont(font);
         lcrossing = new Label("Crossing type: ");
@@ -149,9 +148,9 @@ public class GeneticAlgorithmEditDialog {
         root.add(lselection, 0, 4);
     }
 
-    private void createMyComboBoxOperators(){
+    private void createMyComboBoxOperators() {
         ObservableList<String> parentsList = FXCollections.observableArrayList("PANMIXIA", "INBREEDING", "OUTBREEDING");
-        ObservableList<String> crossingTypesList = FXCollections.observableArrayList("SINGLE POINT CROSSOVER", "TWO POINT CROSSOVER");
+        ObservableList<String> crossingTypesList = FXCollections.observableArrayList("SINGLE POINT", "TWO POINT");
         ObservableList<String> mutationTypesList = FXCollections.observableArrayList("UNIFORM");
         ObservableList<String> selectionTypesList = FXCollections.observableArrayList("ELITE");
 
@@ -169,9 +168,9 @@ public class GeneticAlgorithmEditDialog {
         root.add(comboBoxSelectionTypes, 1, 4);
     }
 
-    private void createComboBoxForJeneticsOperators(){
+    private void createComboBoxForJeneticsOperators() {
         ObservableList<String> crossingTypesList = FXCollections.observableArrayList("UNIFORM", "LINE");
-        ObservableList<String> mutationTypesList = FXCollections.observableArrayList( "SWAP", "GAUSSIAN");
+        ObservableList<String> mutationTypesList = FXCollections.observableArrayList("SWAP", "GAUSSIAN");
         ObservableList<String> selectionTypesList = FXCollections.observableArrayList("TOURNAMENT", "ROULETTE WHEEL");
 
         comboBoxCrossingTypesJenetics = new ComboBox<>(crossingTypesList);
@@ -181,10 +180,10 @@ public class GeneticAlgorithmEditDialog {
         comboBoxMutationTypesJenetics.getSelectionModel().select(jeneticsGA.getMutationType());
         comboBoxSelectionTypesJenetics.getSelectionModel().select(jeneticsGA.getSelectionType());
         root.add(comboBoxCrossingTypesJenetics, 2, 2);
-        root.add(comboBoxMutationTypesJenetics, 2,3);
+        root.add(comboBoxMutationTypesJenetics, 2, 3);
         root.add(comboBoxSelectionTypesJenetics, 2, 4);
     }
-    
+
     private void handleOk() {
         gAlg.setN(Integer.parseInt(numberPopulation.getText()));
         gAlg.setChoiceParents(comboBoxParents.getValue());
@@ -199,64 +198,64 @@ public class GeneticAlgorithmEditDialog {
         jeneticsGA.setSelectionType(comboBoxSelectionTypesJenetics.getValue());
         jeneticsGA.setMutationProbability(Double.parseDouble(mutationProbability.getText()));
     }
-    
-    public void setResult(int countFoundPaths){
-        result.setText("Found "+countFoundPaths+" routes");
+
+    public void setResult(int countFoundPaths) {
+        result.setText("Found " + countFoundPaths + " routes");
     }
-    
-    public void setNumGenerations(int numGenerations){
-        this.numGenerations.setText("Generations: "+numGenerations);
+
+    public void setNumGenerations(int numGenerations) {
+        this.numGenerations.setText("Generations: " + numGenerations);
     }
-    
-    public void setDurationAlgorithm(float time){
-        durationAlg.setText("Time:\t"+time+"  sec");
+
+    public void setDurationAlgorithm(float time) {
+        durationAlg.setText("Time:\t" + time + "  sec");
     }
-    
-    public Dialog getDialog(){
+
+    public Dialog getDialog() {
         return dialog;
     }
-    
-    public Button getBtnRun(){
+
+    public Button getBtnRun() {
         return btnRun;
     }
 
-    public Button getJeneticBtn(){
+    public Button getJeneticBtn() {
         return btnJenetics;
     }
-    
-    public ComboBox<String> getComboBoxParents(){
+
+    public ComboBox<String> getComboBoxParents() {
         return comboBoxParents;
     }
-    
-    public ComboBox<String> getComboBoxCrossingTypes(){
+
+    public ComboBox<String> getComboBoxCrossingTypes() {
         return comboBoxCrossingTypes;
     }
 
-    public ComboBox<String> getComboBoxMutationTypes(){
+    public ComboBox<String> getComboBoxMutationTypes() {
         return comboBoxMutationTypes;
     }
 
-    public ComboBox<String> getComboBoxSelectionTypes(){
+    public ComboBox<String> getComboBoxSelectionTypes() {
         return comboBoxSelectionTypes;
     }
 
-    public ComboBox<String> getComboBoxCrossingJenetics(){
+    public ComboBox<String> getComboBoxCrossingJenetics() {
         return comboBoxCrossingTypesJenetics;
     }
 
-    public ComboBox<String> getComboBoxMutationTypeJenetics(){
+    public ComboBox<String> getComboBoxMutationTypeJenetics() {
         return comboBoxMutationTypesJenetics;
     }
 
-    public ComboBox<String> getComboBoxSelectionJenetics(){
+    public ComboBox<String> getComboBoxSelectionJenetics() {
         return comboBoxSelectionTypesJenetics;
     }
-    
-    public TextField getNumberPopulation(){
+
+    public TextField getNumberPopulation() {
         return numberPopulation;
     }
 
-    public TextField getMutationProbability(){
+    public TextField getMutationProbability() {
         return mutationProbability;
     }
 

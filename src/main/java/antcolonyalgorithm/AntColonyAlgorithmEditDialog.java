@@ -9,13 +9,13 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import main.ValidateInput;
 
 /**
- *
  * @author Ilona
  */
 public class AntColonyAlgorithmEditDialog {
@@ -29,7 +29,10 @@ public class AntColonyAlgorithmEditDialog {
     private Label lAlfa;
     private Label lBetta;
     private Label lEvaporation;
-    private Label lmaxIteration;
+    private Label lMaxIteration;
+    private Label lQ;
+    private Label countIterationsOnBestColony;
+    private Label countIterations;
     private Label result;
     private Label durationAlg;
     private TextField colonySize;
@@ -37,6 +40,7 @@ public class AntColonyAlgorithmEditDialog {
     private TextField betta;
     private TextField evaporation;//коэффициент испарения феромона.
     private TextField maxIterations;
+    private TextField textQ;
     private Font font;
     private Button runAntColonyAlg;
     AntColonyOptimisation aco;
@@ -59,7 +63,7 @@ public class AntColonyAlgorithmEditDialog {
 
         dialog.setResultConverter((ButtonType b) -> {
             if (b == buttonTypeOk) {
-                if (!validationInput.checkDialogAntColonyOptimization(k, colonySize, alpha, betta, evaporation, maxIterations)) {
+                if (!validationInput.checkDialogAntColonyOptimization(k, colonySize, alpha, betta, evaporation, maxIterations, textQ)) {
                     handleOk();
                     return aco;
                 }
@@ -89,9 +93,13 @@ public class AntColonyAlgorithmEditDialog {
         lEvaporation.setFont(font);
         root.add(lEvaporation, 0, 3);
 
-        lmaxIteration = new Label("Max iterations:");
-        lmaxIteration.setFont(font);
-        root.add(lmaxIteration, 0, 4);
+        lMaxIteration = new Label("Max iterations:");
+        lMaxIteration.setFont(font);
+        root.add(lMaxIteration, 0, 4);
+
+        lQ = new Label("Q:");
+        lQ.setFont(font);
+        root.add(lQ, 0, 5);
 
         colonySize = new TextField(String.valueOf(aco.getColonySize()));
         root.add(colonySize, 1, 0);
@@ -108,18 +116,33 @@ public class AntColonyAlgorithmEditDialog {
         maxIterations = new TextField(String.valueOf(aco.getMaxIterations()));
         root.add(maxIterations, 1, 4);
 
+        textQ = new TextField(String.valueOf(aco.getQ()));
+        root.add(textQ, 1, 5);
+
+
+        countIterations = new Label("");
+        countIterations.setFont(font);
+        root.add(countIterations, 1, 8);
+
         result = new Label("");
         result.setFont(font);
-        root.add(result, 0, 6);
+        root.add(result, 0, 7);
+
+        countIterationsOnBestColony = new Label("");
+        countIterationsOnBestColony.setFont(font);
+        root.add(countIterationsOnBestColony, 0, 8);
 
         durationAlg = new Label();
         durationAlg.setFont(font);
-        root.add(durationAlg, 1, 6);
+        root.add(durationAlg, 1, 7);
 
+        DropShadow shadow = new DropShadow();
         runAntColonyAlg = new Button("Run algorithm");
+        runAntColonyAlg.setFont(font);
         runAntColonyAlg.setStyle("-fx-text-fill: navy; -fx-border-color: navy; -fx-border-width: 3px; -fx-underline: true; ");
         runAntColonyAlg.setPadding(new Insets(10, 20, 10, 20));
-        root.add(runAntColonyAlg, 0, 5);
+        runAntColonyAlg.setEffect(shadow);
+        root.add(runAntColonyAlg, 0, 6);
     }
 
     private void handleOk() {
@@ -128,10 +151,19 @@ public class AntColonyAlgorithmEditDialog {
         aco.setBetta(Integer.parseInt(betta.getText()));
         aco.setEvaporation(Double.parseDouble(evaporation.getText()));
         aco.setMaxIterations(Integer.parseInt(maxIterations.getText()));
+        aco.setQ(Integer.parseInt(textQ.getText()));
     }
 
     public void setResult(int countFoundPaths) {
         result.setText("Found\t" + countFoundPaths + " routes");
+    }
+
+    public void setCountIterations(int count) {
+        countIterations.setText("Count iterations:\t" + count);
+    }
+
+    public void setCountIterationsOnBestColony(int count) {
+        countIterationsOnBestColony.setText("in the\t" + count + "\tstep.");
     }
 
     public void setDurationAlgorithm(float time) {
@@ -164,5 +196,9 @@ public class AntColonyAlgorithmEditDialog {
 
     public TextField getMaxIterations() {
         return maxIterations;
+    }
+
+    public TextField getQ() {
+        return textQ;
     }
 }

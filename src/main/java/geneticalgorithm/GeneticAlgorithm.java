@@ -6,9 +6,9 @@ import main.ConvertRouteToString;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Random;
 
 /**
- *
  * @author Илона
  */
 public class GeneticAlgorithm extends ConvertRouteToString {
@@ -24,10 +24,10 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     private int n;
     private LinkedList<Individual> reserveChromosomes;
     private double mutationProbability;
-    
+
     public GeneticAlgorithm() {
         this.choiceParents = ChoiceOfParents.PANMIXIA;
-        this.crossingType = CrossingType.SINGLE_POINT_CROSSOVER;
+        this.crossingType = CrossingType.SINGLE_POINT;
         this.mutationType = MutationType.UNIFORM;
         this.selectionType = SelectionType.ELITE;
         this.n = 20;
@@ -36,7 +36,7 @@ public class GeneticAlgorithm extends ConvertRouteToString {
 
     public GeneticAlgorithm(GenerationMatrix matrix, Population population, String choiceParents, String crossingType, String mutationType, String selectionType, int b, int n, double mutationProbability) {
         this.matrix = matrix;
- 
+
         this.population = population;
         masPair = new int[2 * population.size()];
         this.choiceParents = ChoiceOfParents.valueOf(choiceParents.replace(' ', '_'));
@@ -114,7 +114,7 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     }
 
     public enum CrossingType {
-        SINGLE_POINT_CROSSOVER, TWO_POINT_CROSSOVER
+        SINGLE_POINT, TWO_POINT
     }
 
     //Оператор скрещивания родителей.
@@ -124,7 +124,7 @@ public class GeneticAlgorithm extends ConvertRouteToString {
         int point1 = -2;
         int point2 = -2;//точки разрыва
         switch (crossingType) {
-            case SINGLE_POINT_CROSSOVER://Если  в хромосоме есть две одинаковые вершины, отличные от начала и конца и вершин соседних с ними, то померять местами их концы. 
+            case SINGLE_POINT://Если  в хромосоме есть две одинаковые вершины, отличные от начала и конца и вершин соседних с ними, то померять местами их концы.
                 for (int i = 1; i < masPair.length - 1; i += 2) {
                     if (masPair[i] != masPair[i - 1]) {//если пара не образуется сама с собой
                         arr = population.getAtIndex(masPair[i]).maxLengthInd1AndInd2(population.getAtIndex(masPair[i - 1]));
@@ -143,19 +143,19 @@ public class GeneticAlgorithm extends ConvertRouteToString {
                     }
                 }
                 break;
-            case TWO_POINT_CROSSOVER:
+            case TWO_POINT:
                 for (int i = 1; i < masPair.length - 1; i += 2) {
                     if (masPair[i] != masPair[i - 1]) {//если пара не образуется сама с собой      
-                        twoPointCrossover(population.getAtIndex(masPair[i]),population.getAtIndex(masPair[i-1]));
+                        twoPointCrossover(population.getAtIndex(masPair[i]), population.getAtIndex(masPair[i - 1]));
+                    }
+                    break;
                 }
-                break;
         }
     }
-}
 
-enum MutationType {
-    UNIFORM
-}
+    enum MutationType {
+        UNIFORM
+    }
 
     //Оператор мутации потомков.
     public void mutation() {
@@ -168,13 +168,15 @@ enum MutationType {
 
                     Individual chromosomeAfterMutation;
                     int j = 0;
-
-                    while (j++ < 3) {
-                        chromosomeAfterMutation = new Individual(currentChromosome);
-                        if (chromosomeAfterMutation.mutation(matrix, b, mutationProbability)) {
-                            shortensChromosome(chromosomeAfterMutation);
-                            population.replaceChromosomeAtIndex(i, chromosomeAfterMutation);
-                            break;
+                    double randomXi1 = Math.random();
+                    if (randomXi1 > 0.2) {
+                        while (j++ < 3) {
+                            chromosomeAfterMutation = new Individual(currentChromosome);
+                            if (chromosomeAfterMutation.mutation(matrix, b, mutationProbability)) {
+                                shortensChromosome(chromosomeAfterMutation);
+                                population.replaceChromosomeAtIndex(i, chromosomeAfterMutation);
+                                break;
+                            }
                         }
                     }
                 }
@@ -232,7 +234,7 @@ enum MutationType {
         return null;
     }
 
-   // Добавить в резервный список хромосому, не ссылку на её, а копию.
+    // Добавить в резервный список хромосому, не ссылку на её, а копию.
     public void addReserveChromosome(Individual ind) {
         reserveChromosomes.add(new Individual(ind));
     }
@@ -262,43 +264,41 @@ enum MutationType {
                 if (indexBeginSecond == -1) {
                     indexBeginFirst = j;
                     indexBeginSecond = parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j));
-                } else if(Math.abs(indexBeginFirst - j) > 1 && Math.abs(indexBeginSecond - parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j))) > 1) {
+                } else if (Math.abs(indexBeginFirst - j) > 1 && Math.abs(indexBeginSecond - parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j))) > 1) {
                     indexEndFirst = j;
                     indexEndSecond = parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j));
-                        Individual descendantChromosome1 = new Individual(parentFirst);
-                        Individual descendantChromosome2 = new Individual(parentSecond);
-                        int temp;
-                        if(indexBeginFirst > indexEndFirst)
-                        {
-                            temp = indexEndFirst;
-                            indexEndSecond = indexBeginFirst;
-                            indexBeginFirst = temp;
-                        }
-                        if(indexBeginSecond > indexEndSecond)
-                        {
-                            temp = indexEndSecond;
-                            indexEndSecond = indexBeginSecond;
-                            indexBeginSecond = temp;
-                        }
-                        descendantChromosome1.changeChromosome(parentSecond.getChromomeStructure().subList(indexBeginSecond+1, indexEndSecond), indexBeginFirst + 1, indexEndFirst - 1);
-                        descendantChromosome2.changeChromosome(parentFirst.getChromomeStructure().subList(indexBeginFirst+1, indexEndFirst), indexBeginSecond + 1, indexEndSecond - 1);
-                        population.addChomosome(descendantChromosome1);
-                        population.addChomosome(descendantChromosome2);
+                    Individual descendantChromosome1 = new Individual(parentFirst);
+                    Individual descendantChromosome2 = new Individual(parentSecond);
+                    int temp;
+                    if (indexBeginFirst > indexEndFirst) {
+                        temp = indexEndFirst;
+                        indexEndSecond = indexBeginFirst;
+                        indexBeginFirst = temp;
+                    }
+                    if (indexBeginSecond > indexEndSecond) {
+                        temp = indexEndSecond;
+                        indexEndSecond = indexBeginSecond;
+                        indexBeginSecond = temp;
+                    }
+                    descendantChromosome1.changeChromosome(parentSecond.getChromomeStructure().subList(indexBeginSecond + 1, indexEndSecond), indexBeginFirst + 1, indexEndFirst - 1);
+                    descendantChromosome2.changeChromosome(parentFirst.getChromomeStructure().subList(indexBeginFirst + 1, indexEndFirst), indexBeginSecond + 1, indexEndSecond - 1);
+                    population.addChomosome(descendantChromosome1);
+                    population.addChomosome(descendantChromosome2);
                     break;
                 }
             }
         }
 
     }
-    
+
     public int getN() {
         return n;
     }
-    
+
     public String getSelectionType() {
         return selectionType.toString().replace('_', ' ');
     }
-    
+
     public String getСrossingType() {
         return crossingType.toString().replace('_', ' ');
     }
@@ -306,7 +306,7 @@ enum MutationType {
     public String getMutationType() {
         return mutationType.toString().replace('_', ' ');
     }
-    
+
     public String getChoiceParents() {
         return choiceParents.toString().replace('_', ' ');
     }
@@ -316,25 +316,25 @@ enum MutationType {
     }
 
     public void setN(int n) {
-         this.n = n;
+        this.n = n;
     }
 
-    public void  setMutationProbability(double probability) {
+    public void setMutationProbability(double probability) {
         mutationProbability = probability;
     }
-    
+
     public void setSelectionType(String selectionType) {
         this.selectionType = SelectionType.valueOf(selectionType.replace(' ', '_'));
     }
-    
+
     public void setСrossingType(String crossingType) {
-        this.crossingType =  CrossingType.valueOf(crossingType.toUpperCase().replace(' ', '_'));
+        this.crossingType = CrossingType.valueOf(crossingType.toUpperCase().replace(' ', '_'));
     }
 
     public void setMutationType(String mutationType) {
-        this.mutationType =  MutationType.valueOf(mutationType.toUpperCase().replace(' ', '_'));
+        this.mutationType = MutationType.valueOf(mutationType.toUpperCase().replace(' ', '_'));
     }
-    
+
     public void setChoiceParents(String choiceParents) {
         this.choiceParents = ChoiceOfParents.valueOf(choiceParents.toUpperCase().replace(' ', '_'));
     }

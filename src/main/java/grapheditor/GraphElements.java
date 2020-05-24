@@ -1,9 +1,9 @@
 package grapheditor;
 
 /**
- *
  * @author Илона
  */
+
 import org.apache.commons.collections15.Factory;
 
 public class GraphElements {
@@ -34,11 +34,11 @@ public class GraphElements {
         public String getNumberVertex() {
             char[] dst = new char[name.length()];
             name.getChars(0, name.length(), dst, 0);
-            String str = "";
+            StringBuilder str = new StringBuilder();
             for (Character c : dst) {
-                str += c.toString();
+                str.append(c.toString());
             }
-            return str;
+            return str.toString();
         }
 
         public String toString() {

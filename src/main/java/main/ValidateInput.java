@@ -41,8 +41,8 @@ public class ValidateInput {
         return isInputErrors();
     }
 
-    public boolean checkDialogAntColonyOptimization(TextField k, TextField colonySize, TextField alpha, TextField betta, TextField evaporation, TextField maxIterations) {
-        checkDialogACO(k, colonySize, alpha, betta, evaporation, maxIterations);
+    public boolean checkDialogAntColonyOptimization(TextField k, TextField colonySize, TextField alpha, TextField betta, TextField evaporation, TextField maxIterations, TextField Q) {
+        checkDialogACO(k, colonySize, alpha, betta, evaporation, maxIterations, Q);
         return isInputErrors();
     }
 
@@ -89,7 +89,7 @@ public class ValidateInput {
         this.message = errors;
     }
 
-    private void checkDialogACO(TextField k, TextField colonySize, TextField alpha, TextField betta, TextField evaporation, TextField maxIterations) {
+    private void checkDialogACO(TextField k, TextField colonySize, TextField alpha, TextField betta, TextField evaporation, TextField maxIterations, TextField Q) {
         String errors = "";
         if (!isPositiveNumber(colonySize.getText()) || 2 * Integer.parseInt(k.getText()) > Integer.parseInt(colonySize.getText())) {
             errors += " You incorrectly input the colony size! It is  positive, integer number!\n Colony size > 0 AND Colony size >= " + 2 * Integer.parseInt(k.getText()) + " (2*K).\n";
@@ -105,6 +105,9 @@ public class ValidateInput {
         }
         if (!isPositiveNumber(maxIterations.getText())) {
             errors += "*You incorrectly input the max iteration. It is positive, integer number!\n max iterations > 0 \n";
+        }
+        if (!isPositiveNumber(Q.getText()) || !isIncludedInterval(Q.getText(), 10, 10000)) {
+            errors += "*You incorrectly input the Q. t is positive, integer number 10 <= Q <= 10000!";
         }
         this.message = errors;
     }
@@ -129,7 +132,7 @@ public class ValidateInput {
     }
 
     public boolean isDouble(String text) {
-        return text.matches("[\\+]?[0-9]\\.[0-9]*");
+        return text.matches("[\\+]?[0-9]+\\.[0-9]*");
     }
 
     public boolean isZepoOrOne(String text) {

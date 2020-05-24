@@ -3,7 +3,6 @@ package antcolonyalgorithm;
 import java.util.Comparator;
 
 /**
- *
  * @author Илона
  */
 public class RouteComparator implements Comparator<Ant> {
@@ -13,7 +12,7 @@ public class RouteComparator implements Comparator<Ant> {
         if (ant1.getRoute() == ant2.getRoute()) {
             return 0;
         }
-        if (ant1.getRouteLenght() > ant2.getRouteLenght()) {
+        if (ant1.getRouteLength() > ant2.getRouteLength()) {
             return 1;
         } else {
             return -1;

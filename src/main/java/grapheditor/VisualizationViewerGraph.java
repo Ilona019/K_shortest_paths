@@ -2,11 +2,13 @@ package grapheditor;
 
 
 import edu.uci.ics.jung.algorithms.layout.KKLayout;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Paint;
 import java.awt.Font;
 import java.util.*;
+
 import org.apache.commons.collections15.Transformer;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.Graph;
@@ -19,29 +21,35 @@ import edu.uci.ics.jung.visualization.control.EditingModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.BasicEdgeRenderer;
+
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
+
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import edu.uci.ics.jung.visualization.transform.shape.GraphicsDecorator;
 import grapheditor.GraphElements.MyEdge;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+
 import javafx.scene.control.TextField;
+
 import javax.swing.JButton;
 import javax.swing.JTextField;
+
 import org.apache.commons.collections15.Predicate;
 import main.ValidateInput;
+import org.apache.commons.collections15.functors.ChainedTransformer;
 
 /**
- *
  * @author Илона
  */
-public class VisualizationViewerGraph{
+public class VisualizationViewerGraph {
 
     private SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> graph;
     private GenerationMatrix matrix;
@@ -68,9 +76,9 @@ public class VisualizationViewerGraph{
         graph = new SparseMultigraph<>();
         frame = new JFrame("Draw graph");
         layout = new KKLayout<>(graph);
-        layout.setSize(new Dimension(1000, 1000));
+        layout.setSize(new Dimension(1800, 1000));
         vv = new VisualizationViewer<>(layout);
-        
+
 
         settingsVisualizationGraph();
 
@@ -100,7 +108,7 @@ public class VisualizationViewerGraph{
             RandomGraphEditDialog randomGraphEditDialog = new RandomGraphEditDialog(this, currentRandomGraphEditDialog);
             currentRandomGraphEditDialog = randomGraphEditDialog.getrandomGraphEditDialog();
         });
-        
+
         btnClear.addActionListener((ActionEvent eventClear) -> {
             clearGraph();
         });
@@ -124,7 +132,7 @@ public class VisualizationViewerGraph{
         frame.pack();
         frame.setVisible(true);
 
-}
+    }
 
     // Add some popup menus for the edges and vertices to our mouse plugin.
     private void createPopupMenu(PopupVertexEdgeMenuMousePlugin<GraphElements.MyVertex, GraphElements.MyEdge> myPlugin) {
@@ -157,6 +165,7 @@ public class VisualizationViewerGraph{
         vv.getRenderContext().setEdgeFontTransformer(new MyEdgesFont());
         vv.getRenderContext().setEdgeLabelTransformer(new EdgeLabelTransformer());
         vv.getRenderContext().setVertexShapeTransformer(new MySizeVertex());
+        vv.getRenderContext().setVertexLabelTransformer(new ChainedTransformer());
         improvePerformance(vv);
     }
 
@@ -225,7 +234,7 @@ public class VisualizationViewerGraph{
     public Layout<GraphElements.MyVertex, GraphElements.MyEdge> getLayout() {
         return layout;
     }
-     
+
     public ArrayList<ArrayList<GraphElements.MyEdge>> getPaintedEdgeslist() {
         return paintedEdgeslist;
     }
@@ -233,12 +242,12 @@ public class VisualizationViewerGraph{
     public ArrayList<MyEdge> getChEdgeList() {
         return chEdgeList;
     }
-    
+
     public void setValidationInput(ValidateInput validationInput) {
         this.validationInput = validationInput;
     }
 
-    
+
     public void setListOfShortcut(ArrayList<LinkedList<Integer>> list) {
         this.listOfShortcut = list;
     }
@@ -265,9 +274,9 @@ public class VisualizationViewerGraph{
         chEdgeList = new ArrayList<>();
         int numEdge = 0;
         paintedEdgeslist = new ArrayList<>();//список списков для раскрашивания ребер каждого пути в определённый цвет
-        if(listOfShortcut.size() < countRoutes)
+        if (listOfShortcut.size() < countRoutes)
             countRoutes = listOfShortcut.size();
-        
+
         //По всевозможным найденым путям пройтись
         ArrayList<GraphElements.MyEdge> copyLayout = new ArrayList<>(layout.getGraph().getEdges());//скопировала массив вершин без добавленные ребер
         for (int i = 0; i < countRoutes; i++) {
@@ -293,13 +302,13 @@ public class VisualizationViewerGraph{
 
         }
     }
-    
-    
+
+
     //Преобразут список вершин хромосомы в список ребер для добавления параллельных ребер(без дубликатов ребер)
     public ArrayList<MyEdge> formEdgesList(LinkedList<Integer> listVerteces) {
         ArrayList<MyEdge> edgesList = new ArrayList<>();
         GraphElements.MyEdge e;
-        
+
         for (int i = 0; i < listVerteces.size() - 1; i++) {
             e = graph.findEdge(matrix.getVertexOfIndex(listVerteces.get(i)), matrix.getVertexOfIndex(listVerteces.get(i + 1)));
             if (!edgesList.contains(e)) {
@@ -327,7 +336,7 @@ public class VisualizationViewerGraph{
         chEdgeList = null;
         paintedEdgeslist = null;
         listOfShortcut = null;
-        
+
         frame.repaint();
     }
 
@@ -340,14 +349,14 @@ public class VisualizationViewerGraph{
     }
 
     void setNewRandomGraphMatrix(JTextField textCountVertex, JTextField textFrom, JTextField textBefore, int percentOfEdges) {
-                    matrix = new GenerationMatrix(Integer.parseInt(textCountVertex.getText()), Integer.parseInt(textFrom.getText()), Integer.parseInt(textBefore.getText()), percentOfEdges, "0", "4");
-                    graph = matrix.getGraf();
-                    layout.setGraph(graph);
-                    frame.repaint();
+        matrix = new GenerationMatrix(Integer.parseInt(textCountVertex.getText()), Integer.parseInt(textFrom.getText()), Integer.parseInt(textBefore.getText()), percentOfEdges, "0", "4");
+        graph = matrix.getGraf();
+        layout.setGraph(graph);
+        frame.repaint();
     }
 
     public void setMatrix(GenerationMatrix matrix) {
-       this.matrix = matrix;
+        this.matrix = matrix;
     }
 
     /**
@@ -357,8 +366,8 @@ public class VisualizationViewerGraph{
     public class MyEdgePaintFunction implements Transformer<GraphElements.MyEdge, Paint> {
 
         private final Color[] palette = {new Color(255, 99, 71), new Color(20, 144, 255),
-            Color.MAGENTA, Color.GREEN, Color.YELLOW, new Color(148, 0, 212),
-            new Color(0, 100, 0), Color.PINK, Color.DARK_GRAY, new Color(20, 144, 255), Color.RED, new Color(123, 104, 238), new Color(255, 100, 100), Color.ORANGE, Color.BLUE};
+                Color.MAGENTA, Color.GREEN, Color.YELLOW, new Color(148, 0, 212),
+                new Color(0, 100, 0), Color.PINK, Color.DARK_GRAY, new Color(20, 144, 255), Color.RED, new Color(123, 104, 238), new Color(255, 100, 100), Color.ORANGE, Color.BLUE};
 
         @Override
         public Paint transform(GraphElements.MyEdge e) {
@@ -396,7 +405,7 @@ public class VisualizationViewerGraph{
     public class MyEdgeStrokeFunction implements Transformer<GraphElements.MyEdge, Stroke> {
 
         protected final Stroke THIN = new BasicStroke(1);//тонкое ребро
-        protected final Stroke THICK = new BasicStroke(3);//толстое ребро
+        protected final Stroke THICK = new BasicStroke(2);//толстое ребро
 
         @Override
         public Stroke transform(GraphElements.MyEdge e) {
@@ -442,11 +451,19 @@ public class VisualizationViewerGraph{
             if (e.getName().contains("ParalEdge")) {
                 return "";
             } else {
-                return "Weight " + e.getWeight();
+                return String.valueOf(e.getWeight());
             }
 
         }
 
+    }
+
+    public static class ChainedTransformer implements Transformer<GraphElements.MyVertex, String> {
+
+        @Override
+        public String transform(GraphElements.MyVertex myVertex) {
+            return "<html><font color=\"black\">" + myVertex.getNumberVertex();
+        }
     }
 
     //Изменить размер вершины
@@ -456,10 +473,9 @@ public class VisualizationViewerGraph{
         public Shape transform(GraphElements.MyVertex i) {
             Ellipse2D circle = new Ellipse2D.Double(-14, -14, 28, 28);
             // in this case, the vertex is twice as large//в 1.5 раза больше
-            if(validationInput.isNonNegativeNumber(s.getText()) && (Integer.parseInt(i.getName()) == Integer.parseInt(s.getText()))) {
-                 return AffineTransform.getScaleInstance(1.5, 1.5).createTransformedShape(circle);
-            }
-            else if(validationInput.isNonNegativeNumber(t.getText()) && (Integer.parseInt(i.getName()) == Integer.parseInt(t.getText()))) {
+            if (validationInput.isNonNegativeNumber(s.getText()) && (Integer.parseInt(i.getName()) == Integer.parseInt(s.getText()))) {
+                return AffineTransform.getScaleInstance(1.5, 1.5).createTransformedShape(circle);
+            } else if (validationInput.isNonNegativeNumber(t.getText()) && (Integer.parseInt(i.getName()) == Integer.parseInt(t.getText()))) {
                 return AffineTransform.getScaleInstance(1.5, 1.5).createTransformedShape(circle);
             } else {
                 return circle;
@@ -488,7 +504,7 @@ public class VisualizationViewerGraph{
                 Point2D point = vv.getGraphLayout().transform(c.element);
                 Point2D transformed
                         = vv.getRenderContext().getMultiLayerTransformer()
-                                .transform(point);
+                        .transform(point);
                 if (transformed.getX() < 0 || transformed.getX() > size.width) {
                     return false;
                 }
@@ -525,7 +541,7 @@ public class VisualizationViewerGraph{
                 if (!rc.getVertexIncludePredicate().evaluate(
                         Context.<Graph<V, E>, V>getInstance(graph, v1))
                         && !rc.getVertexIncludePredicate().evaluate(
-                                Context.<Graph<V, E>, V>getInstance(graph, v2))) {
+                        Context.<Graph<V, E>, V>getInstance(graph, v2))) {
                     return;
                 }
 

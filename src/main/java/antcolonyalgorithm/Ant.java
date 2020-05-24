@@ -3,36 +3,47 @@ package antcolonyalgorithm;
 import grapheditor.GenerationMatrix;
 import main.ConvertRouteToString;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
- *
  * @author Ilona
  */
 public class Ant extends ConvertRouteToString {
 
     private LinkedList<Integer> route;
-    private boolean visitedVertex[];
+    private boolean[] visitedVertex;
     private LinkedList<Integer> neighborsVertexForLastVertex;
     private GenerationMatrix matrix;
-    private int routeLenght;
+    private int routeLength;
+    private int indexNewPath;
 
-    public Ant(Ant cloneAnt) {
+    public Ant(Ant cloneAnt, LinkedList<Integer> path) {
         this.matrix = cloneAnt.matrix;
-        route = (LinkedList<Integer>) cloneAnt.route.clone();
+        route = new LinkedList<>(path);
         visitedVertex = cloneAnt.visitedVertex;
-        routeLenght = cloneAnt.routeLenght;
+        routeLength = calculateRouteAllLength(matrix);
+        indexNewPath = cloneAnt.indexNewPath;
     }
 
     public Ant(int size, GenerationMatrix matrix) {
         this.matrix = matrix;
         route = new LinkedList<>();
         visitedVertex = new boolean[size];
-        routeLenght = 0;
+        routeLength = 0;
+        indexNewPath = 0;
+    }
+
+    public void setIndexNewPath() {
+        indexNewPath = route.size() - 1;
     }
 
     public Integer getCurrentVertex() {
         return route.getLast();
+    }
+
+    public int getIndexNewPath() {
+        return indexNewPath;
     }
 
     public Integer getAtIndexVertex(int index) {
@@ -49,7 +60,7 @@ public class Ant extends ConvertRouteToString {
 
     public void visitVertex(Integer vertex) {
         if (!route.isEmpty()) {
-            routeLenght += matrix.getWeight(route.getLast(), vertex);
+            routeLength += matrix.getWeight(route.getLast(), vertex);
         }
         route.add(vertex);
         visitedVertex[vertex] = true;
@@ -60,55 +71,91 @@ public class Ant extends ConvertRouteToString {
         return visitedVertex[index];
     }
 
-    public void calculateRouteLength(GenerationMatrix matrix) {
-        int lenght = 0;
-        for (int i = 0; i < route.size() - 1; i++) {
-            lenght += matrix.getWeight(route.get(i), route.get(i + 1));
+    public int calculateRouteLengthToT(GenerationMatrix matrix) {
+        int length = 0;
+        for (int i = 0; i < indexNewPath; i++) {
+            length += matrix.getWeight(route.get(i), route.get(i + 1));
         }
-        this.routeLenght = lenght;
+        return length;
     }
 
-    public int getRouteLenght() {
-        return routeLenght;
+    public int calculateRouteLengthToS(GenerationMatrix matrix) {
+        int length = 0;
+        for (int i = indexNewPath; i < route.size() - 1; i++) {
+            length += matrix.getWeight(route.get(i), route.get(i + 1));
+        }
+        return length;
+    }
+
+    public int calculateRouteAllLength(GenerationMatrix matrix) {
+        int length = 0;
+        for (int i = 0; i < route.size() - 1; i++) {
+            length += matrix.getWeight(route.get(i), route.get(i + 1));
+        }
+        return length;
+    }
+
+    public void deleteBadPathTS() {
+        int count = 0;
+        while (count != (route.size() - 1 - indexNewPath)) {
+            Integer vertexRemoved = route.removeLast();
+            routeLength -= matrix.getWeight(route.getFirst(), vertexRemoved);
+            count++;
+        }
+    }
+
+    public int getRouteLength() {
+        return routeLength;
+    }
+
+    public LinkedList<Integer> getRouteST() {
+        return new LinkedList<>(route.subList(0, indexNewPath + 1));
+    }
+
+    public LinkedList<Integer> getRouteTS() {
+        return new LinkedList<>(route.subList(indexNewPath, route.size()));
     }
 
     //Вес пути не превосходит В?
-    public boolean fitnessFunctionWeight(int b) {
-        return routeLenght <= b;
+    public boolean fitnessFunctionWeightST(int b) {
+        return calculateRouteLengthToT(matrix) <= b;
+    }
+
+    public boolean fitnessFunctionWeightTS(int b) {
+        return calculateRouteLengthToS(matrix) <= b;
     }
 
     public void clearVisited() {
-        for (int i = 0; i < visitedVertex.length; i++) {
-            visitedVertex[i] = false;
-        }
+        Arrays.fill(visitedVertex, false);
         route.clear();
-        routeLenght = 0;
+        routeLength = 0;
+    }
+
+    public void cancelVisitVertex(int index) {
+        visitedVertex[index] = false;
     }
 
     public void oneStepVertexBack() {
         int lastVertex = route.removeLast();
         visitedVertex[lastVertex] = true;
-        if (route.size() > 1) {
-            routeLenght -= matrix.getWeight(route.getLast(), lastVertex);
-        }
 
+        if (route.size() > 1) {
+            routeLength -= matrix.getWeight(route.getLast(), lastVertex);
+        }
         createListOfNeighboringVertices();
     }
 
     public boolean maybyVisitVertex(int vertex) {
-        if (neighborsVertexForLastVertex.contains(vertex)) {
-            return true;
-        }
-        return false;
+        return neighborsVertexForLastVertex.contains(vertex);
     }
 
     @Override
     public String toString() {
-        String strRoute = "";
+        StringBuilder strRoute = new StringBuilder();
         for (Integer element : route) {
-            strRoute += element + " ";
+            strRoute.append(element).append(" ");
         }
-        return strRoute;
+        return strRoute.toString();
     }
 
     private void createListOfNeighboringVertices() {
@@ -116,9 +163,9 @@ public class Ant extends ConvertRouteToString {
     }
 
     public boolean equalsRoute(Ant ant) {
-        String str1 = this.getRoute().toString();
-        String str2 = ant.getRoute().toString();
-        return str1.equals(str2);
+        String route1 = this.getRoute().toString();
+        String route2 = ant.getRoute().toString();
+        return route1.equals(route2);
     }
 
 }
