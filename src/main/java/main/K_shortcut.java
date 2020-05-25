@@ -12,6 +12,7 @@ import geneticalgorithm.RouteComparator;
 import grapheditor.GraphElements;
 import grapheditor.VisualizationViewerGraph;
 
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -89,7 +90,7 @@ public class K_shortcut extends Application {
                         visGraph.setMatrix(matrix);
                         performGeneticAlgorithm(gaDialog);
 
-                        displayRoutesOnGraph();
+                            displayRoutesOnGraph();
 
                         writeResponseToFile(population.convertRoutesToString(matrix));
                     }
@@ -112,7 +113,8 @@ public class K_shortcut extends Application {
                                 gaDialog.setDurationAlgorithm(jga.getDurationAlg());
                                 gaDialog.setNumGenerations(jga.numberGeneration());
 
-                                displayRoutesOnGraph();
+                                    displayRoutesOnGraph();
+
 
                                 writeResponseToFile(jga.convertRoutesToString(matrix));
                             }
@@ -142,7 +144,8 @@ public class K_shortcut extends Application {
                         antDialog.setCountIterationsOnBestColony(antColony.getCountIterationsOnBestColony());
                         antDialog.setDurationAlgorithm(antColony.getDuration());
 
-                        displayRoutesOnGraph();
+                            displayRoutesOnGraph();
+
 
                         writeResponseToFile(antColony.convertRoutesToString(matrix));
                     }

@@ -7,8 +7,13 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Paint;
 import java.awt.Font;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
+import edu.uci.ics.jung.visualization.BasicVisualizationServer;
+import edu.uci.ics.jung.visualization.VisualizationImageServer;
 import org.apache.commons.collections15.Transformer;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.Graph;
@@ -44,7 +49,9 @@ import javax.swing.JTextField;
 
 import org.apache.commons.collections15.Predicate;
 import main.ValidateInput;
-import org.apache.commons.collections15.functors.ChainedTransformer;
+import org.freehep.graphicsbase.util.export.ExportDialog;
+
+
 
 /**
  * @author Илона
@@ -61,6 +68,7 @@ public class VisualizationViewerGraph {
     private JButton btnDeleteParalEdges;
     private JButton btnClear;
     private JButton btnRandomGraph;
+    private JButton btnExportImgGraph;
     final JFrame frame;
     private TextField s;
     private TextField t;
@@ -81,6 +89,7 @@ public class VisualizationViewerGraph {
 
 
         settingsVisualizationGraph();
+        improvePerformance(vv);
 
         EditingModalGraphMouse<GraphElements.MyVertex, GraphElements.MyEdge> graphMouse = createGraphMouse();
 
@@ -126,6 +135,12 @@ public class VisualizationViewerGraph {
                 frame.repaint();
             }
         });
+        
+        btnExportImgGraph.addActionListener((ActionEvent eventDeleteEdges) -> {
+                ExportDialog export = new ExportDialog();
+                export.showExportDialog( frame, "Export view as ...", vv, "Graph" );
+
+        });
 
         frame.setJMenuBar(menuBar);
         graphMouse.setMode(ModalGraphMouse.Mode.EDITING); // Start off in editing mode
@@ -166,7 +181,6 @@ public class VisualizationViewerGraph {
         vv.getRenderContext().setEdgeLabelTransformer(new EdgeLabelTransformer());
         vv.getRenderContext().setVertexShapeTransformer(new MySizeVertex());
         vv.getRenderContext().setVertexLabelTransformer(new ChainedTransformer());
-        improvePerformance(vv);
     }
 
     private void repaintAfterUpdates() {
@@ -224,7 +238,8 @@ public class VisualizationViewerGraph {
         menuBar.add(btnDeleteParalEdges);
         btnClear = new JButton("Clear");
         menuBar.add(btnClear);
-
+        btnExportImgGraph = new JButton("Print Screen");
+        menuBar.add(btnExportImgGraph);
     }
 
     public SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> getGraph() {
