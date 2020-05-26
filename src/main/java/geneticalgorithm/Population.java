@@ -50,7 +50,7 @@ public class Population extends ConvertRouteToString {
     public int indexMaxRoute() {
         int indexMax = 0;
         for (int i = 0; i < population.size(); i++) {
-            if (population.get(i).getRoute() > indexMax) {
+            if (population.get(i).getLengthRoute() > indexMax) {
                 indexMax = i;
             }
         }
@@ -67,13 +67,13 @@ public class Population extends ConvertRouteToString {
 
     //Ищет особь с наиболее близким по длине маршрута, возвращает её индекс в популяции.
     public int indexNearbyRoute(int index) {
-        int path = population.get(index).getRoute();
-        int minDifference = population.get(indexMaxRoute()).getRoute();
+        int path = population.get(index).getLengthRoute();
+        int minDifference = population.get(indexMaxRoute()).getLengthRoute();
         int indexNear = index;
         
         for (int i = 0; i < population.size(); i++) {
-            if (i != index && Math.abs(population.get(i).getRoute() - path) < minDifference) {
-                minDifference  = Math.abs(population.get(i).getRoute() - path);
+            if (i != index && Math.abs(population.get(i).getLengthRoute() - path) < minDifference) {
+                minDifference  = Math.abs(population.get(i).getLengthRoute() - path);
                 indexNear = i;
             }
         }
@@ -107,14 +107,14 @@ public class Population extends ConvertRouteToString {
         Individual currentChr;
         while (iteratorP.hasNext()) {
             currentChr = iteratorP.next();
-            System.out.println(i++ + ")  route == " + currentChr.getRoute() + "\t" + routeToString(m, currentChr.getChromomeStructure()) + "\n (weight < B) ? = " + currentChr.getFitnessF() + "\n");
+            System.out.println(i++ + ")  route == " + currentChr.getLengthRoute() + "\t" + routeToString(m, currentChr.getChromomeStructure()) + "\n (weight < B) ? = " + currentChr.getFitnessF() + "\n");
         }
     }
 
     public String convertRoutesToString(GenerationMatrix m) {
         String str = "";
         for (int i = 0; i < population.size(); i++) {
-            str += i+")"+ "Route == " + population.get(i).getRoute() + ";\t" + routeToString(m, population.get(i).getChromomeStructure()) + "\n";
+            str += i+")"+ "Route == " + population.get(i).getLengthRoute() + ";\t" + routeToString(m, population.get(i).getChromomeStructure()) + "\n";
         }
         return str;
     }

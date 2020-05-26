@@ -121,8 +121,6 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     public void crossing() {
         Individual indMin, indMax;//по длине хромосомы
         ArrayList<Individual> arr;
-        int point1 = -2;
-        int point2 = -2;//точки разрыва
         switch (crossingType) {
             case SINGLE_POINT://Если  в хромосоме есть две одинаковые вершины, отличные от начала и конца и вершин соседних с ними, то померять местами их концы.
                 for (int i = 1; i < masPair.length - 1; i += 2) {
@@ -130,26 +128,21 @@ public class GeneticAlgorithm extends ConvertRouteToString {
                         arr = population.getAtIndex(masPair[i]).maxLengthInd1AndInd2(population.getAtIndex(masPair[i - 1]));
                         indMax = arr.get(0);//Наибольшая по длине хромосома
                         indMin = arr.get(1);//Наименьшая по длине хромосома
-                        for (int j = 2; j < indMax.getChromomeStructure().size() - 2; j++) {
-                            point1 = j;
-                            if (indMin.isNumberVertex(indMax.getChromomeStructure().get(point1), 1) != -1) {
-                                point2 = indMin.isNumberVertex(indMax.getChromomeStructure().get(point1), 1);
-                                //формируем 2 - х потомков и добавляем в популяцию
-                                population.addChomosome(new Individual(indMax.getDescendantChromosome(point1, indMax), matrix, b));
-                                population.addChomosome(new Individual(indMin.getDescendantChromosome(point2, indMin), matrix, b));
-                                break;
-                            }
-                        }
+
+                        singlePointCrossover(indMax, indMin);
                     }
                 }
                 break;
             case TWO_POINT:
                 for (int i = 1; i < masPair.length - 1; i += 2) {
-                    if (masPair[i] != masPair[i - 1]) {//если пара не образуется сама с собой      
-                        twoPointCrossover(population.getAtIndex(masPair[i]), population.getAtIndex(masPair[i - 1]));
+                    if (masPair[i] != masPair[i - 1]) {//если пара не образуется сама с собой
+                        arr = population.getAtIndex(masPair[i]).maxLengthInd1AndInd2(population.getAtIndex(masPair[i - 1]));
+                        indMax = arr.get(0);//Наибольшая по длине хромосома
+                        indMin = arr.get(1);//Наименьшая по длине хромосома
+                        twoPointCrossover(indMax, indMin);
                     }
-                    break;
                 }
+                break;
         }
     }
 
@@ -163,7 +156,7 @@ public class GeneticAlgorithm extends ConvertRouteToString {
             case UNIFORM:
                 Individual currentChromosome;
 
-                for (int i = 0; i < population.size(); i++) {
+                for (int i = n; i < population.size(); i++) {
                     currentChromosome = population.getAtIndex(i);
 
                     Individual chromosomeAfterMutation;
@@ -181,6 +174,7 @@ public class GeneticAlgorithm extends ConvertRouteToString {
                     }
                 }
         }
+
     }
 
     public void shortensChromosome(Individual ind) {
@@ -216,8 +210,8 @@ public class GeneticAlgorithm extends ConvertRouteToString {
 
     //Существует ли в резервном списке такой индивид ind с аналогичным маршрутом?
     public boolean existInReserve(Individual ind) {
-        for (int i = 0; i < reserveChromosomes.size(); i++) {
-            if (reserveChromosomes.get(i).equalsChromosome(ind)) {
+        for (Individual reserveChromosome : reserveChromosomes) {
+            if (reserveChromosome.equalsChromosome(ind)) {
                 return true;
             }
         }
@@ -226,9 +220,9 @@ public class GeneticAlgorithm extends ConvertRouteToString {
 
     //Вернуть индивид из резерва, который отсутствует в популяции.
     public Individual returnItemDifferentOthers(Population population) {
-        for (int i = 0; i < reserveChromosomes.size(); i++) {
-            if (!population.existInPopulation(reserveChromosomes.get(i))) {
-                return reserveChromosomes.get(i);
+        for (Individual reserveChromosome : reserveChromosomes) {
+            if (!population.existInPopulation(reserveChromosome)) {
+                return reserveChromosome;
             }
         }
         return null;
@@ -240,55 +234,72 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     }
 
     public void printReserveList() {
-        for (int i = 0; i < reserveChromosomes.size(); i++) {
-            System.out.println(routeToString(matrix, reserveChromosomes.get(i).getChromomeStructure()) + " ");
+        for (Individual reserveChromosome : reserveChromosomes) {
+            System.out.println(routeToString(matrix, reserveChromosome.getChromomeStructure()) + " ");
         }
     }
 
-    public void twoPointCrossover(Individual parent1, Individual parent2) {
-        int indexBeginFirst = -1;
-        int indexEndFirst;
-        int indexBeginSecond = -1;
-        int indexEndSecond;
-        Individual parentFirst;
-        Individual parentSecond;
-        if (parent1.getChromomeStructure().size() > parent2.getChromomeStructure().size()) {
-            parentFirst = parent1;
-            parentSecond = parent2;
-        } else {
-            parentFirst = parent2;
-            parentSecond = parent1;
+    public void singlePointCrossover(Individual parentFirst, Individual parentSecond) {
+        int point1;
+        int point2;//точки разрыва
+        point1 = (int) (Math.random() * (parentFirst.getSizeChromosome() - 2)) + 1;
+        point2 = (int) (Math.random() * (parentSecond.getSizeChromosome() - 2)) + 1;
+
+        Individual descendantChromosome1 = new Individual(parentFirst.getDescendantChromosome(point1, point2, parentSecond), matrix, b);
+        Individual descendantChromosome2 = new Individual(parentSecond.getDescendantChromosome(point2, point1, parentFirst), matrix, b);
+
+        if (descendantChromosome1.isPath(matrix)) {
+            population.addChomosome(descendantChromosome1);
         }
-        for (int j = 1; j < parentFirst.getChromomeStructure().size() - 1; j++) {
-            if (parentSecond.getChromomeStructure().contains(parentFirst.getChromomeStructure().get(j))) {
-                if (indexBeginSecond == -1) {
-                    indexBeginFirst = j;
-                    indexBeginSecond = parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j));
-                } else if (Math.abs(indexBeginFirst - j) > 1 && Math.abs(indexBeginSecond - parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j))) > 1) {
-                    indexEndFirst = j;
-                    indexEndSecond = parentSecond.getChromomeStructure().lastIndexOf(parentFirst.getChromomeStructure().get(j));
-                    Individual descendantChromosome1 = new Individual(parentFirst);
-                    Individual descendantChromosome2 = new Individual(parentSecond);
-                    int temp;
-                    if (indexBeginFirst > indexEndFirst) {
-                        temp = indexEndFirst;
-                        indexEndSecond = indexBeginFirst;
-                        indexBeginFirst = temp;
-                    }
-                    if (indexBeginSecond > indexEndSecond) {
-                        temp = indexEndSecond;
-                        indexEndSecond = indexBeginSecond;
-                        indexBeginSecond = temp;
-                    }
-                    descendantChromosome1.changeChromosome(parentSecond.getChromomeStructure().subList(indexBeginSecond + 1, indexEndSecond), indexBeginFirst + 1, indexEndFirst - 1);
-                    descendantChromosome2.changeChromosome(parentFirst.getChromomeStructure().subList(indexBeginFirst + 1, indexEndFirst), indexBeginSecond + 1, indexEndSecond - 1);
-                    population.addChomosome(descendantChromosome1);
-                    population.addChomosome(descendantChromosome2);
-                    break;
-                }
-            }
+        if (descendantChromosome2.isPath(matrix)) {
+            population.addChomosome(descendantChromosome2);
+        }
+    }
+
+    public void twoPointCrossover(Individual parentFirst, Individual parentSecond) {
+        int indexBeginFirst;
+        int indexEndFirst;
+        int indexBeginSecond;
+        int indexEndSecond;
+
+        //определила точки скрещивания для первого родителя.
+        int randomFirstPointCrossing = (int) (Math.random() * (parentFirst.getSizeChromosome() - 2)) + 1;
+        int randomSecondPointCrossing = (int) (Math.random() * (parentFirst.getSizeChromosome() - 2)) + 1;
+
+        if (randomFirstPointCrossing < randomSecondPointCrossing) {
+            indexBeginFirst = randomFirstPointCrossing;
+            indexEndFirst = randomSecondPointCrossing;
+        } else {
+            indexBeginFirst = randomSecondPointCrossing;
+            indexEndFirst = randomFirstPointCrossing;
         }
 
+        //определила точки скрещивания для второго родителя.
+        randomFirstPointCrossing = (int) (Math.random() * (parentSecond.getSizeChromosome() - 2)) + 1;
+        randomSecondPointCrossing = (int) (Math.random() * (parentSecond.getSizeChromosome() - 2)) + 1;
+
+        if (randomFirstPointCrossing < randomSecondPointCrossing) {
+            indexBeginSecond = randomFirstPointCrossing;
+            indexEndSecond = randomSecondPointCrossing;
+        } else {
+            indexBeginSecond = randomSecondPointCrossing;
+            indexEndSecond = randomFirstPointCrossing;
+        }
+
+        Individual descendantChromosome1 = new Individual(parentFirst);
+        Individual descendantChromosome2 = new Individual(parentSecond);
+        descendantChromosome2.changeChromosome(parentFirst.getChromomeStructure().subList(indexBeginFirst, indexEndFirst + 1), indexBeginSecond, indexEndSecond);
+        descendantChromosome1.changeChromosome(parentSecond.getChromomeStructure().subList(indexBeginSecond, indexEndSecond + 1), indexBeginFirst, indexEndFirst);
+
+        descendantChromosome1.removeDublicatesVertex();
+        descendantChromosome2.removeDublicatesVertex();
+
+        if (descendantChromosome1.isPath(matrix)) {
+            population.addChomosome(descendantChromosome1);
+        }
+        if (descendantChromosome2.isPath(matrix)) {
+            population.addChomosome(descendantChromosome2);
+        }
     }
 
     public int getN() {

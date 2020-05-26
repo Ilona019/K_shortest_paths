@@ -12,7 +12,6 @@ import geneticalgorithm.RouteComparator;
 import grapheditor.GraphElements;
 import grapheditor.VisualizationViewerGraph;
 
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -178,7 +177,7 @@ public class K_shortcut extends Application {
         } else {
             while (gAlg.getReserveChromosomes().size() < Integer.parseInt(k.getText())) {
                 generationN++;
-                if (generationN > 1000) {
+                if (generationN >= 1000) {
                     break;
                 }
                 gAlg.choiceParents();

@@ -39,7 +39,7 @@ public class Individual {
     //Конструктор для создания копии объекта
     public Individual(Individual indCopy) {
         chromosome = (LinkedList<Integer>) indCopy.chromosome.clone();
-        route = indCopy.getRoute();
+        route = indCopy.getLengthRoute();
         fitnessF = indCopy.getFitnessF();
     }
 
@@ -69,7 +69,6 @@ public class Individual {
                     break;
                 }
             }
-            //Collections.shuffle(chromosome);//переставить случайным образом массив генов.
 
             if (matrix.getWeight(pred, t) != 0) {//хромосома образует путь
                 newChromosome.add(t);
@@ -102,8 +101,19 @@ public class Individual {
         return true;
     }
 
+    public void removeDublicatesVertex() {
+        for (int j = 1, curSize = chromosome.size(); j < curSize - 2; j++) {
+            if (Objects.equals(chromosome.get(j), chromosome.get(j + 1))) {
+                chromosome.remove(j);
+                curSize--;
+                j--;
+            }
+        }
+
+    }
+
     //Убирать дубликаты вершин, стоящие рядом;
-    public LinkedList<Integer> removeDublicatesVertex(LinkedList<Integer> newChromosome) {
+    private LinkedList<Integer> removeDublicatesVertex(LinkedList<Integer> newChromosome) {
         for (int j = 1, curSize = newChromosome.size(); j < curSize - 2; j++) {
             if (Objects.equals(newChromosome.get(j), newChromosome.get(j + 1))) {
                 newChromosome.remove(j);
@@ -164,14 +174,11 @@ public class Individual {
     }
 
     //Получить хромосому будущего потомка в виде списка
-    public LinkedList<Integer> getDescendantChromosome(int point, Individual parent2) {
-        LinkedList<Integer> dCh = new LinkedList<>();
-        for (int i = 0; i < parent2.getChromomeStructure().size(); i++) {
-            if (i <= point) {
-                dCh.add(this.getChromomeStructure().get(i));
-            } else {
-                dCh.add(parent2.getChromomeStructure().get(i));
-            }
+    public LinkedList<Integer> getDescendantChromosome(int point, int pointParent2, Individual parent2) {
+        LinkedList<Integer> dCh = new LinkedList<>(chromosome.subList(0, point + 1));
+
+        for (int i = pointParent2; i < parent2.getChromomeStructure().size(); i++) {
+            dCh.add(parent2.getChromomeStructure().get(i));
         }
         return dCh;
     }
@@ -239,7 +246,11 @@ public class Individual {
         return chromosome;
     }
 
-    public int getRoute() {
+    public int getSizeChromosome() {
+        return chromosome.size();
+    }
+
+    public int getLengthRoute() {
         return this.route;
     }
 
