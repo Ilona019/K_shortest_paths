@@ -2,19 +2,22 @@
 package grapheditor;
 
 import edu.uci.ics.jung.visualization.VisualizationViewer;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JMenuItem;
 
 /**
- * A class to implement the deletion of a vertex from within a 
+ * A class to implement the deletion of a vertex from within a
  * PopupVertexEdgeMenuMousePlugin.
-  */
-public class DeleteVertexMenuItem<V> extends JMenuItem implements VertexMenuListener<V> {
+ */
+public class DeleteVertexMenuItem<V, E> extends JMenuItem implements VertexMenuListener<V> {
     private V vertex;
-    private VisualizationViewer visComp;
-    
-    /** Creates a new instance of DeleteVertexMenuItem */
+    private VisualizationViewer<V, E> visComp;
+
+    /**
+     * Creates a new instance of DeleteVertexMenuItem
+     */
     public DeleteVertexMenuItem() {
         super("Delete Vertex");
         this.addActionListener((ActionEvent e) -> {
@@ -26,8 +29,9 @@ public class DeleteVertexMenuItem<V> extends JMenuItem implements VertexMenuList
 
     /**
      * Implements the VertexMenuListener interface.
-     * @param v 
-     * @param visComp 
+     *
+     * @param v
+     * @param visComp
      */
     @Override
     public void setVertexAndView(V v, VisualizationViewer visComp) {
@@ -35,5 +39,5 @@ public class DeleteVertexMenuItem<V> extends JMenuItem implements VertexMenuList
         this.visComp = visComp;
         this.setText("Delete Vertex " + v.toString());
     }
-    
+
 }

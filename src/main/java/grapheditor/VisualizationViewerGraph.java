@@ -12,25 +12,19 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
-import edu.uci.ics.jung.visualization.BasicVisualizationServer;
-import edu.uci.ics.jung.visualization.VisualizationImageServer;
+import edu.uci.ics.jung.visualization.*;
 import org.apache.commons.collections15.Transformer;
 import edu.uci.ics.jung.algorithms.layout.Layout;
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.SparseMultigraph;
 import edu.uci.ics.jung.graph.util.Context;
 import edu.uci.ics.jung.graph.util.Pair;
-import edu.uci.ics.jung.visualization.RenderContext;
-import edu.uci.ics.jung.visualization.VisualizationViewer;
 import edu.uci.ics.jung.visualization.control.EditingModalGraphMouse;
 import edu.uci.ics.jung.visualization.control.ModalGraphMouse;
 import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 import edu.uci.ics.jung.visualization.renderers.BasicEdgeRenderer;
 
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JPopupMenu;
+import javax.swing.*;
 
 import edu.uci.ics.jung.visualization.renderers.Renderer;
 import edu.uci.ics.jung.visualization.transform.shape.GraphicsDecorator;
@@ -44,13 +38,9 @@ import java.awt.geom.Point2D;
 
 import javafx.scene.control.TextField;
 
-import javax.swing.JButton;
-import javax.swing.JTextField;
-
 import org.apache.commons.collections15.Predicate;
 import main.ValidateInput;
 import org.freehep.graphicsbase.util.export.ExportDialog;
-
 
 
 /**
@@ -87,7 +77,6 @@ public class VisualizationViewerGraph {
         layout.setSize(new Dimension(1800, 1000));
         vv = new VisualizationViewer<>(layout);
 
-
         settingsVisualizationGraph();
         improvePerformance(vv);
 
@@ -104,7 +93,8 @@ public class VisualizationViewerGraph {
         vv.setGraphMouse(graphMouse);
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(vv);
+        frame.getContentPane().add(new GraphZoomScrollPane(vv));
+
 
         repaintAfterUpdates();
 
@@ -135,10 +125,10 @@ public class VisualizationViewerGraph {
                 frame.repaint();
             }
         });
-        
+
         btnExportImgGraph.addActionListener((ActionEvent eventDeleteEdges) -> {
-                ExportDialog export = new ExportDialog();
-                export.showExportDialog( frame, "Export view as ...", vv, "Graph" );
+            ExportDialog export = new ExportDialog();
+            export.showExportDialog(frame, "Export view as ...", vv, "Graph");
 
         });
 
@@ -199,18 +189,16 @@ public class VisualizationViewerGraph {
                 }
 
                 numColor = 0;
-                GraphElements.MyEdge edge;
-                for (int j = 0; j < paintedEdgeslist.size(); j++) {
-                    chEdgeList = new ArrayList<>(paintedEdgeslist.get(j));
-                    for (int i = 0; i < chEdgeList.size(); i++) {
-                        Iterator<GraphElements.MyEdge> iteratorEdge = chEdgeList.iterator();
-                        while (iteratorEdge.hasNext()) {
-                            edge = iteratorEdge.next();
-                            Renderer<GraphElements.MyVertex, GraphElements.MyEdge> renderer = vv.getRenderer();
+                for (ArrayList<MyEdge> curRouteEdge : paintedEdgeslist) {
+                    chEdgeList = new ArrayList<>(curRouteEdge);
+
+                    for (MyEdge e : layout.getGraph().getEdges()) {
+                        if (chEdgeList.contains(e)) {
+                            Renderer<GraphElements.MyVertex, MyEdge> renderer = vv.getRenderer();
                             renderer.renderEdge(
                                     vv.getRenderContext(),
                                     layout,
-                                    edge);
+                                    e);
                         }
                     }
                     numColor++;
@@ -293,28 +281,24 @@ public class VisualizationViewerGraph {
             countRoutes = listOfShortcut.size();
 
         //По всевозможным найденым путям пройтись
-        ArrayList<GraphElements.MyEdge> copyLayout = new ArrayList<>(layout.getGraph().getEdges());//скопировала массив вершин без добавленные ребер
         for (int i = 0; i < countRoutes; i++) {
             ArrayList<GraphElements.MyEdge> path = new ArrayList<>();
             paintedEdgeslist.add(path);
             chEdgeList = formEdgesList(listOfShortcut.get(i));//получить список ребер.
-            // for all edges, paint edges that are in minimum path 
-            for (GraphElements.MyEdge e : copyLayout) {
+            // for all edges, paint edges that are in minimum path
+            for (GraphElements.MyEdge e : chEdgeList) {
 
-                if (isEdgecontainsInPath(e)) {//ребро присутствует в chEdgeList
-                    if (e.getFlagPaint() == 0) {//ещё не проходили по ребру, добавить это ребо для окраски в массив
-                        path.add(e);
-                        e.setFlagPaint(1);
-                    } else {
-                        Collection<GraphElements.MyVertex> masVer = new ArrayList<>();
-                        masVer = graph.getIncidentVertices(e);//массив вершин, содержащих ребро
-                        GraphElements.MyEdge paralEdge = new MyEdge("ParalEdge" + numEdge++, e.getWeight());
-                        graph.addEdge(paralEdge, masVer);//добавить параллельное ребро
-                        path.add(paralEdge);
-                    }
+                if (e.getFlagPaint() == 0) {//ещё не проходили по ребру, добавить это ребо для окраски в массив
+                    path.add(e);
+                    e.setFlagPaint(1);
+                } else {
+                    Collection<GraphElements.MyVertex> masVer;
+                    masVer = graph.getIncidentVertices(e);//массив вершин, содержащих ребро
+                    GraphElements.MyEdge paralEdge = new MyEdge("ParalEdge" + numEdge++, e.getWeight());
+                    graph.addEdge(paralEdge, masVer);//добавить параллельное ребро
+                    path.add(paralEdge);
                 }
             }
-
         }
     }
 

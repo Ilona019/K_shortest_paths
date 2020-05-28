@@ -26,7 +26,7 @@ public class GenerationMatrix {
     public GenerationMatrix(SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> graph, String s1, String t1) {
         this.graph = graph;
         matrix = new int[graph.getVertexCount()][];
-        renameV = new HashMap<>();
+        renameV = new HashMap<>(graph.getVertexCount());
         this.initializeVertex(s1, t1);
         for (int i = 1, l = 1; i < graph.getVertexCount(); i++, l++) {
             matrix[i] = new int[l];
@@ -43,7 +43,6 @@ public class GenerationMatrix {
 
     public GenerationMatrix(int countVertex, int from, int before, int edgePercent, String s, String t) {
         matrix = new int[countVertex][];
-        renameV = new HashMap<>();
         int willEdges = countVertex * (countVertex - 1) * edgePercent / 200;
         int edgesFullGraph = countVertex * (countVertex - 1) / 2;
 
@@ -83,6 +82,7 @@ public class GenerationMatrix {
             graph.addVertex(newVertex);
         }
 
+        renameV = new HashMap<>();
         this.initializeVertex(s, t);
 
         //добавление ребра

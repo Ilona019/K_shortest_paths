@@ -5,6 +5,7 @@ import grapheditor.GenerationMatrix;
 
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -64,7 +65,9 @@ public class AntColonyOptimisation {
         pheromoneMatrix = new double[numberVertex][numberVertex];
         probabilities = new HashMap<>();
         IntStream.range(0, colonySize)
-                .forEach(i -> ants.add(new Ant(numberVertex, matrix)));
+                .forEach(i -> {
+                    ants.add(new Ant(numberVertex, matrix));
+                });
         antsColonyBest = new LinkedList<>();
         currentColonyBest = new LinkedList<>();
         countIterations = 0;
@@ -95,7 +98,12 @@ public class AntColonyOptimisation {
     }
 
     private void setupAnts() {
-        IntStream.range(0, colonySize)
+        //Если на предыдущей итерации удалялись муравьи, восстановить недостающих.
+        IntStream.range(ants.size(), colonySize)
+                .forEach(i -> {
+                    ants.add(new Ant(numberVertex, matrix));
+                });
+        IntStream.range(0, ants.size())
                 .forEach(i -> {
                     ants.forEach(ant -> {
                         ant.clearVisited();
@@ -155,10 +163,14 @@ public class AntColonyOptimisation {
         while (true) {
             calculateProbabilities(ant);
 
-            //сортировка  по возрастанию хэша вероятностей попадания в следующую вершину
-            probabilities.entrySet()
+            //сортировка по возрастанию хэша вероятностей попадания в следующую вершину
+            probabilities = probabilities.entrySet()
                     .stream()
-                    .sorted(Map.Entry.comparingByValue());
+                    .sorted(Entry.comparingByValue())
+                    .collect(Collectors.toMap(
+                            Map.Entry::getKey,
+                            Map.Entry::getValue,
+                            (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
             if (ant.getIndexNewPath() == 0) {
                 if (probabilities.isEmpty() && (ant.getCurrentVertex() != matrix.getS())) {
@@ -244,7 +256,7 @@ public class AntColonyOptimisation {
                 }
             }
 
-            if (a.fitnessFunctionWeightTS(b) && a.getRouteTS() != null) {
+            if (a.fitnessFunctionWeightTS(b) && a.getRouteTS().size() > 1) {
                 LinkedList<Integer> pathTS = a.getRouteTS();
                 Collections.reverse(pathTS);
 
@@ -253,7 +265,6 @@ public class AntColonyOptimisation {
                     currentColonyBest.add(cloneAnt);
                 }
             }
-
         }
         if (antsColonyBest.size() <= currentColonyBest.size()) {
             antsColonyBest.clear();
