@@ -7,16 +7,18 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Paint;
 import java.awt.Font;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.awt.event.KeyEvent;
+import java.io.*;
 import java.util.*;
 
+import edu.uci.ics.jung.algorithms.layout.StaticLayout;
+import edu.uci.ics.jung.graph.*;
+import edu.uci.ics.jung.io.GraphIOException;
+import edu.uci.ics.jung.io.GraphMLWriter;
+import edu.uci.ics.jung.io.graphml.*;
 import edu.uci.ics.jung.visualization.*;
 import org.apache.commons.collections15.Transformer;
 import edu.uci.ics.jung.algorithms.layout.Layout;
-import edu.uci.ics.jung.graph.Graph;
-import edu.uci.ics.jung.graph.SparseMultigraph;
 import edu.uci.ics.jung.graph.util.Context;
 import edu.uci.ics.jung.graph.util.Pair;
 import edu.uci.ics.jung.visualization.control.EditingModalGraphMouse;
@@ -48,7 +50,7 @@ import org.freehep.graphicsbase.util.export.ExportDialog;
  */
 public class VisualizationViewerGraph {
 
-    private SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> graph;
+    private SparseMultigraph<GraphElements.MyVertex, MyEdge> graph;
     private GenerationMatrix matrix;
     private ArrayList<MyEdge> chEdgeList;
     private ArrayList<ArrayList<GraphElements.MyEdge>> paintedEdgeslist;
@@ -58,7 +60,6 @@ public class VisualizationViewerGraph {
     private JButton btnDeleteParalEdges;
     private JButton btnClear;
     private JButton btnRandomGraph;
-    private JButton btnExportImgGraph;
     final JFrame frame;
     private TextField s;
     private TextField t;
@@ -126,17 +127,120 @@ public class VisualizationViewerGraph {
             }
         });
 
-        btnExportImgGraph.addActionListener((ActionEvent eventDeleteEdges) -> {
+        //export image graph
+        menuBar.getMenu(0).getItem(2).addActionListener((ActionEvent eventDeleteEdges) -> {
+
             ExportDialog export = new ExportDialog();
             export.showExportDialog(frame, "Export view as ...", vv, "Graph");
 
+        });
+
+        final JFileChooser fileChooser = new JFileChooser();
+        //File -> save graph
+        menuBar.getMenu(0).getItem(0).addActionListener((ActionEvent eventSaveGraph) -> {
+            if (eventSaveGraph.getSource() == menuBar.getMenu(0).getItem(0)) {
+                int returnVal = fileChooser.showSaveDialog(frame);
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    StaticLayout<GraphElements.MyVertex, GraphElements.MyEdge> staticLayout = new StaticLayout<>(graph, layout, new Dimension(1800, 1000));
+
+                    GraphMLWriter<GraphElements.MyVertex, GraphElements.MyEdge> graphWriter = new GraphMLWriter<GraphElements.MyVertex, MyEdge>();
+
+                    PrintWriter out = null;
+                    try {
+                        out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    graphWriter.addEdgeData("weight", null, "0", myEdge -> String.valueOf(myEdge.getWeight()));
+
+                    graphWriter.addEdgeData("nameLink", null, "0", myEdge -> String.valueOf(myEdge.getName()));
+                    graphWriter.addVertexData("x", null, "0", myVertex -> Double.toString(staticLayout.getX(myVertex)));
+                    graphWriter.addVertexData("y", null, "0", myVertex -> Double.toString(staticLayout.getY(myVertex)));
+                    try {
+                        assert out != null;
+                        graphWriter.save(graph, out);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
+        //loading graph from GraphML
+        menuBar.getMenu(0).getItem(1).addActionListener((ActionEvent eventLoadGraph) -> {
+            if (eventLoadGraph.getSource() == menuBar.getMenu(0).getItem(1)) {
+                int returnVal = fileChooser.showOpenDialog(frame);
+
+                if (returnVal == JFileChooser.APPROVE_OPTION) {
+                    File file = fileChooser.getSelectedFile();
+                    String fileName = file.toString();
+                    BufferedReader fileReader = null;
+                    try {
+                        fileReader = new BufferedReader(
+                                new FileReader(fileName));
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    Transformer<GraphMetadata, Graph<GraphElements.MyVertex, GraphElements.MyEdge>>
+                            graphTransformer = metadata -> new
+                            SparseMultigraph<>();
+                    /* Create the Vertex Transformer */
+                    Transformer<NodeMetadata, GraphElements.MyVertex> vertexTransformer
+                            = metadata -> {
+                        GraphElements.MyVertex v =
+                                GraphElements.MyVertexFactory.getInstance().create(Integer.parseInt(metadata.getId()));
+
+                        layout.setLocation(v, new Point2D() {
+                            @Override
+                            public double getX() {
+                                return java.lang.Double.parseDouble(metadata.getProperty("x"));
+                            }
+
+                            @Override
+                            public double getY() {
+                                return java.lang.Double.parseDouble(metadata.getProperty("y"));
+                            }
+
+                            @Override
+                            public void setLocation(double x, double y) {
+                                layout.transform(v).setLocation(x, y);
+                            }
+                        });
+                        return v;
+                    };
+                    /* Create the Edge Transformer */
+                    Transformer<EdgeMetadata, MyEdge> edgeTransformer =
+                            metadata -> GraphElements.MyEdgeFactory.getInstance().create(metadata.getProperty("nameLink"), Integer.parseInt(metadata.getProperties().get("weight")));
+
+                    /* Create the Hyperedge Transformer */
+                    Transformer<HyperEdgeMetadata, MyEdge> hyperEdgeTransformer
+                            = metadata -> GraphElements.MyEdgeFactory.getInstance().create();
+
+                    /* Create the graphMLReader2 */
+                    assert fileReader != null;
+                    GraphMLReader2<Graph<GraphElements.MyVertex, MyEdge>, GraphElements.MyVertex, MyEdge>
+                            graphReader = new
+                            GraphMLReader2<>
+                            (fileReader, graphTransformer, vertexTransformer,
+                                    edgeTransformer, hyperEdgeTransformer);
+
+                    try {
+                        /* Get the new graph object from the GraphML file */
+                        graph = (SparseMultigraph<GraphElements.MyVertex, MyEdge>) graphReader.readGraph();
+                    } catch (GraphIOException ignored) {
+                    }
+                    layout.setGraph(graph);
+                    frame.repaint();
+                }
+            }
         });
 
         frame.setJMenuBar(menuBar);
         graphMouse.setMode(ModalGraphMouse.Mode.EDITING); // Start off in editing mode
         frame.pack();
         frame.setVisible(true);
-
     }
 
     // Add some popup menus for the edges and vertices to our mouse plugin.
@@ -211,11 +315,25 @@ public class VisualizationViewerGraph {
     // a menu for changing mouse modes
     private JMenuBar createMenuBar(EditingModalGraphMouse<GraphElements.MyVertex, GraphElements.MyEdge> graphMouse) {
         JMenuBar menuBar = new JMenuBar();
+
+        JMenu menuFile = new JMenu("File");
+        menuFile.setPreferredSize(new Dimension(80, 20));
+        JMenuItem save = new JMenuItem("Save graph");
+        menuFile.add(save);
+
+        JMenuItem loadGraph = new JMenuItem("Load graph from GraphML");
+        menuFile.add(loadGraph);
+
+        JMenuItem exportImgGraph = new JMenuItem("Print Screen");
+        menuFile.add(exportImgGraph);
+        menuBar.add(menuFile);
+
         JMenu modeMenu = graphMouse.getModeMenu();
         modeMenu.setText("Mouse Mode");
         modeMenu.setIcon(null);
         modeMenu.setPreferredSize(new Dimension(80, 20));
         menuBar.add(modeMenu);
+
         return menuBar;
     }
 
@@ -226,8 +344,6 @@ public class VisualizationViewerGraph {
         menuBar.add(btnDeleteParalEdges);
         btnClear = new JButton("Clear");
         menuBar.add(btnClear);
-        btnExportImgGraph = new JButton("Print Screen");
-        menuBar.add(btnExportImgGraph);
     }
 
     public SparseMultigraph<GraphElements.MyVertex, GraphElements.MyEdge> getGraph() {

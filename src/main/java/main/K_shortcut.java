@@ -167,6 +167,7 @@ public class K_shortcut extends Application {
             population.addChomosome(chromosome);
         }
         gAlg = new GeneticAlgorithm(matrix, population, gaDialog.getComboBoxParents().getValue(), gaDialog.getComboBoxCrossingTypes().getValue(), gaDialog.getComboBoxMutationTypes().getValue(), gaDialog.getComboBoxSelectionTypes().getValue(), Integer.parseInt(b.getText()), Integer.parseInt(gaDialog.getNumberPopulation().getText()), Double.parseDouble(gaDialog.getMutationProbability().getText()));
+        population.printPopulation(matrix);
         for (int i = 0; i < population.size(); i++)//Поместили в резерв хромосомы из начальной популяции
         {
             if (population.getAtIndex(i).getFitnessF() && !gAlg.existInReserve(population.getAtIndex(i))) {
@@ -236,7 +237,6 @@ public class K_shortcut extends Application {
         }
         population.setListPopulation(gAlg.getReserveChromosomes());
         population.getPopulation().sort(myRouteComparator);
-
         formListRoutes(population);
         gaDialog.setResult(population.size());
         gaDialog.setNumGenerations(generationN);

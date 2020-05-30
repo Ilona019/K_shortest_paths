@@ -112,6 +112,12 @@ public class GraphElements {
             return new MyVertex(name);
         }
 
+        public GraphElements.MyVertex create(int id) {
+            String name = "" + id;
+            nodeCount++;
+            return new MyVertex(name);
+        }
+
         public static void setNullNodeCount() {
             nodeCount = 0;
         }
@@ -136,6 +142,14 @@ public class GraphElements {
             String name = "Link" + linkCount++;
             MyEdge link = new MyEdge(name);
             link.setWeight(defaultWeight);
+            return link;
+        }
+
+        public GraphElements.MyEdge create(String idName, int weight) {
+            String name = idName;
+            MyEdge link = new MyEdge(name);
+            link.setWeight(weight);
+            linkCount++;
             return link;
         }
 

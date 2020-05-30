@@ -6,6 +6,7 @@ import main.ConvertRouteToString;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -29,7 +30,7 @@ public class GeneticAlgorithm extends ConvertRouteToString {
         this.choiceParents = ChoiceOfParents.PANMIXIA;
         this.crossingType = CrossingType.SINGLE_POINT;
         this.mutationType = MutationType.UNIFORM;
-        this.selectionType = SelectionType.ELITE;
+        this.selectionType = SelectionType.EXCLUSION;
         this.n = 20;
         mutationProbability = 0.5;
     }
@@ -50,40 +51,36 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     }
 
     public enum SelectionType {
-        ELITE
+        EXCLUSION
     }
 
     //Оператор селекции, отбор в новую популяцию.
     public void selection() {
         switch (selectionType) {
-            case ELITE:
+            case EXCLUSION:
                 RouteComparator myRouteComparator = new RouteComparator();
                 population.getPopulation().sort(myRouteComparator);//сортировка возрастанию длины пути
                 int needDelete = population.getPopulation().size() - n;//надо удалить
                 int deleted = 0;//кол-во удалённых хромосом
-                for (int i = 0, size = population.getPopulation().size(); i < size; i++) {
-                    if (needDelete == deleted) {
+                Population reserveIndividual = new Population();
+                for (int i = 0 ;  i < population.getPopulation().size(); i++) {
+                    if (deleted == needDelete) {
                         break;
                     }
-                    if (!population.getPopulation().getLast().fitnessFunctionWeight(b)) {
-                        population.getPopulation().removeLast();//удаляем хромосомы не удовлетворяющие условию путь <= B.
-                        deleted++;//cчётчик сколько удалили хромосом.
-                    }
-
+                        if(existInNewPopulation(population.getAtIndex(i), population.getPopulation().subList(0, i))) {
+                            reserveIndividual.addChomosome(population.getPopulation().remove(i--));
+                            deleted ++;
+                        }
                 }
-                Individual ind;
                 if (needDelete > deleted) {//если не достаточно хромосом удалили, то доудалим наиболее длинные по длине пути.
                     while (needDelete != deleted) {
-                        ind = population.getPopulation().removeLast();
-                        if (!existInReserve(ind))//Если такой хромосомы нет в cписке резерва -> добавим
-                        {
-                            this.addReserveChromosome(ind);
-                        }
+                        population.getPopulation().removeLast();
                         deleted++;
                     }
                 }
                 break;
         }
+
     }
 
     public enum ChoiceOfParents {
@@ -125,21 +122,14 @@ public class GeneticAlgorithm extends ConvertRouteToString {
             case SINGLE_POINT://Если  в хромосоме есть две одинаковые вершины, отличные от начала и конца и вершин соседних с ними, то померять местами их концы.
                 for (int i = 1; i < masPair.length - 1; i += 2) {
                     if (masPair[i] != masPair[i - 1]) {//если пара не образуется сама с собой
-                        arr = population.getAtIndex(masPair[i]).maxLengthInd1AndInd2(population.getAtIndex(masPair[i - 1]));
-                        indMax = arr.get(0);//Наибольшая по длине хромосома
-                        indMin = arr.get(1);//Наименьшая по длине хромосома
-
-                        singlePointCrossover(indMax, indMin);
+                        singlePointCrossover(population.getAtIndex(masPair[i]), population.getAtIndex(masPair[i - 1]));
                     }
                 }
                 break;
             case TWO_POINT:
                 for (int i = 1; i < masPair.length - 1; i += 2) {
                     if (masPair[i] != masPair[i - 1]) {//если пара не образуется сама с собой
-                        arr = population.getAtIndex(masPair[i]).maxLengthInd1AndInd2(population.getAtIndex(masPair[i - 1]));
-                        indMax = arr.get(0);//Наибольшая по длине хромосома
-                        indMin = arr.get(1);//Наименьшая по длине хромосома
-                        twoPointCrossover(indMax, indMin);
+                        twoPointCrossover(population.getAtIndex(masPair[i]), population.getAtIndex(masPair[i - 1]));
                     }
                 }
                 break;
@@ -179,26 +169,13 @@ public class GeneticAlgorithm extends ConvertRouteToString {
 
     public void shortensChromosome(Individual ind) {
         int point2;//индекс эквивалентной вершины
-        int flag;
-        if (reserveChromosomes.isEmpty()) {
-            flag = 0;//сокращаем хромосому до конца
-        } else {
-            flag = 1;
-        }
+
         for (int point1 = 1; point1 < ind.getChromomeStructure().size() - 1; point1++) {
 
-            if (ind.isNumberVertex(ind.getChromomeStructure().get(point1), point1 + 1) != -1) {//есть ли начиная с индекса point1, вершина ch.get_list_chromosome().get(point1)
-                point2 = ind.isNumberVertex(ind.getChromomeStructure().get(point1), point1 + 1);
-                if (!existInReserve(ind) && ind.getFitnessF())//сохраним в резерв хорошую хромосому по приспособленности до мутации, если её нет в резерве
-                {
-                    this.addReserveChromosome(new Individual(ind));
-                }
-
+            point2 = ind.isNumberVertex(ind.getChromomeStructure().get(point1), point1 + 1);
+            if (point2 != -1) {//есть ли начиная с индекса point1, вершина ch.get_list_chromosome().get(point1)
                 ind.cutPartChromosome(point1, point2);
                 ind.recalculateFitnessFunc(matrix, b);//изменилась длина маршрута и надо пересчитать фитнесс функцию
-                if (flag == 1) {
-                    break;
-                }
             }
         }
 
@@ -212,6 +189,15 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     public boolean existInReserve(Individual ind) {
         for (Individual reserveChromosome : reserveChromosomes) {
             if (reserveChromosome.equalsChromosome(ind)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean existInNewPopulation(Individual ind, List<Individual> list) {
+        for (Individual individual : list) {
+            if (individual.equalsChromosome(ind)) {
                 return true;
             }
         }
@@ -245,6 +231,16 @@ public class GeneticAlgorithm extends ConvertRouteToString {
         point1 = (int) (Math.random() * (parentFirst.getSizeChromosome() - 2)) + 1;
         point2 = (int) (Math.random() * (parentSecond.getSizeChromosome() - 2)) + 1;
 
+        if(parentFirst.getSizeChromosome() == 2) {
+            point1 = 0;
+        }
+        if(parentSecond.getSizeChromosome() == 2) {
+            point2 = 0;
+        }
+        if(point1 == 0 && point2 == 0) {
+            return;
+        }
+
         Individual descendantChromosome1 = new Individual(parentFirst.getDescendantChromosome(point1, point2, parentSecond), matrix, b);
         Individual descendantChromosome2 = new Individual(parentSecond.getDescendantChromosome(point2, point1, parentFirst), matrix, b);
 
@@ -254,6 +250,8 @@ public class GeneticAlgorithm extends ConvertRouteToString {
         if (descendantChromosome2.isPath(matrix)) {
             population.addChomosome(descendantChromosome2);
         }
+        shortensChromosome(parentFirst);
+        shortensChromosome(parentSecond);
     }
 
     public void twoPointCrossover(Individual parentFirst, Individual parentSecond) {

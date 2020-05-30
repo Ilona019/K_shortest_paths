@@ -152,7 +152,7 @@ public class GeneticAlgorithmEditDialog {
         ObservableList<String> parentsList = FXCollections.observableArrayList("PANMIXIA", "INBREEDING", "OUTBREEDING");
         ObservableList<String> crossingTypesList = FXCollections.observableArrayList("SINGLE POINT", "TWO POINT");
         ObservableList<String> mutationTypesList = FXCollections.observableArrayList("UNIFORM");
-        ObservableList<String> selectionTypesList = FXCollections.observableArrayList("ELITE");
+        ObservableList<String> selectionTypesList = FXCollections.observableArrayList("EXCLUSION");
 
         comboBoxParents = new ComboBox<>(parentsList);
         comboBoxCrossingTypes = new ComboBox<>(crossingTypesList);

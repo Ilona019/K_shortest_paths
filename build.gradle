@@ -13,6 +13,9 @@ repositories {
 
 dependencies {
 
+    // https://mvnrepository.com/artifact/net.sf.jung/jung-io
+    compile group: 'net.sf.jung', name: 'jung-io', version: '2.0.1'
+
     compile 'net.sf.jung:jung-graph-impl:2.0.1'
     compile 'net.sf.jung:jung-visualization:2.0.1'
 

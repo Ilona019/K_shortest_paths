@@ -84,8 +84,8 @@ public class Individual {
     }
 
     public void cutPartChromosome(int startIndex, int endIndex) {
-        for (int k = startIndex, count = 0; endIndex - startIndex != count; count++) {
-            chromosome.remove(k);
+        for (int count = 0; endIndex - startIndex != count; count++) {
+            chromosome.remove(startIndex);
         }
     }
 
@@ -157,13 +157,15 @@ public class Individual {
     }
 
     //Содержит хромосома номер вершины, начиная с номера index? Да - вернуть её номер
-    public int isNumberVertex(int v, int index) {
+    public int isNumberVertex(int vertex, int index) {
+        int indexEqualsVetex = -1;
         for (int i = index; i < chromosome.size() - 1; i++) {
-            if (chromosome.get(i) == v) {
-                return i;
+            if (chromosome.get(i) == vertex) {
+                indexEqualsVetex = i;
             }
         }
-        return -1;
+
+        return indexEqualsVetex;
     }
 
     //Заменить фраграмент [indexBegin indexEnd] хромосомы на передаваемый фрагмент списка.
@@ -175,12 +177,12 @@ public class Individual {
 
     //Получить хромосому будущего потомка в виде списка
     public LinkedList<Integer> getDescendantChromosome(int point, int pointParent2, Individual parent2) {
-        LinkedList<Integer> dCh = new LinkedList<>(chromosome.subList(0, point + 1));
+        LinkedList<Integer> newDescendant = new LinkedList<>(chromosome.subList(0, point + 1));
 
-        for (int i = pointParent2; i < parent2.getChromomeStructure().size(); i++) {
-            dCh.add(parent2.getChromomeStructure().get(i));
+        for (int i = pointParent2 + 1; i < parent2.getChromomeStructure().size(); i++) {
+            newDescendant.add(parent2.getChromomeStructure().get(i));
         }
-        return dCh;
+        return newDescendant;
     }
 
     //Хромосомы совпадают?    
@@ -193,30 +195,30 @@ public class Individual {
     //мутация в гене, вставить случайную вершину.
     public boolean mutation(GenerationMatrix matrix, int b, double mutationProbability) {
         if (matrix.getCountVerteces() == 2) {
-            return false;
-        }
+            insertRandomVerteces(matrix);
+        } else {
 
-        int randomVertex;
-        int positionChromosome;
+            int randomVertex;
+            int positionChromosome;
 
-        for (int i = 1; i < chromosome.size() - 1; i++) {
-            double random = Math.random();
-            if (random >= mutationProbability) {
-                if (chromosome.size() != 2) {
-                    positionChromosome = i;
-                    do {
-                        randomVertex = (int) (Math.random() * matrix.getCountVerteces());
-                    } while (randomVertex == chromosome.get(0) || randomVertex == chromosome.getLast());
+            for (int i = 1; i < chromosome.size() - 1; i++) {
+                double random = Math.random();
+                if (random >= mutationProbability) {
+                    if (chromosome.size() != 2) {
+                        positionChromosome = i;
+                        do {
+                            randomVertex = (int) (Math.random() * matrix.getCountVerteces());
+                        } while (randomVertex == chromosome.get(0) || randomVertex == chromosome.getLast());
 
-                    chromosome.add(positionChromosome, randomVertex);
-                    chromosome.remove(positionChromosome + 1);
+                        chromosome.add(positionChromosome, randomVertex);
+                        chromosome.remove(positionChromosome + 1);
+                    }
                 }
             }
+
+            insertRandomVerteces(matrix);
+            removeDublicatesVertex(chromosome);
         }
-
-        insertRandomVerteces(matrix);
-        removeDublicatesVertex(chromosome);
-
         if (isPath(matrix)) {
             route = fitnessFunctionPath(matrix);
             fitnessF = fitnessFunctionWeight(b);
