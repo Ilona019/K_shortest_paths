@@ -7,7 +7,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Paint;
 import java.awt.Font;
-import java.awt.event.KeyEvent;
 import java.io.*;
 import java.util.*;
 
@@ -154,7 +153,6 @@ public class VisualizationViewerGraph {
                     }
 
                     graphWriter.addEdgeData("weight", null, "0", myEdge -> String.valueOf(myEdge.getWeight()));
-
                     graphWriter.addEdgeData("nameLink", null, "0", myEdge -> String.valueOf(myEdge.getName()));
                     graphWriter.addVertexData("x", null, "0", myVertex -> Double.toString(staticLayout.getX(myVertex)));
                     graphWriter.addVertexData("y", null, "0", myVertex -> Double.toString(staticLayout.getY(myVertex)));

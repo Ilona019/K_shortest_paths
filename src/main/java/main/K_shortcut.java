@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -37,13 +38,8 @@ import jeneticsga.JeneticsGA;
  */
 public class K_shortcut extends Application {
 
-    private Font font;
-    private Label lk;
-    private Label lb;
     private TextField k;
     private TextField b;
-    private Label ls;
-    private Label lt;
     private TextField s;
     private TextField t;
     private Button btnJeneticsRun;
@@ -167,7 +163,6 @@ public class K_shortcut extends Application {
             population.addChomosome(chromosome);
         }
         gAlg = new GeneticAlgorithm(matrix, population, gaDialog.getComboBoxParents().getValue(), gaDialog.getComboBoxCrossingTypes().getValue(), gaDialog.getComboBoxMutationTypes().getValue(), gaDialog.getComboBoxSelectionTypes().getValue(), Integer.parseInt(b.getText()), Integer.parseInt(gaDialog.getNumberPopulation().getText()), Double.parseDouble(gaDialog.getMutationProbability().getText()));
-        population.printPopulation(matrix);
         for (int i = 0; i < population.size(); i++)//Поместили в резерв хромосомы из начальной популяции
         {
             if (population.getAtIndex(i).getFitnessF() && !gAlg.existInReserve(population.getAtIndex(i))) {
@@ -215,7 +210,7 @@ public class K_shortcut extends Application {
                         if (!population.getAtIndex(i).getFitnessF()) {
                             replace_ind = gAlg.returnItemDifferentOthers(population); //Вернуть отличный от других в популяции элемент из резерва.
                             if (replace_ind != null) {
-                                population.replaceChromosomeAtIndex(i, new Individual(replace_ind));//Заменить повторяющийся уникальным для популяции. 
+                                population.replaceChromosomeAtIndex(i, new Individual(replace_ind));//Заменить повторяющийся уникальным для популяции.
                                 vertexDublicate.add(i);
                                 count_replace++;
                                 if (count_replace == gAlg.getReserveChromosomes().size()) {//"кончились" элементы резерва для замены.
@@ -270,22 +265,22 @@ public class K_shortcut extends Application {
         root.setAlignment(Pos.CENTER);
         root.setHgap(10);
         root.setVgap(10);
-        font = javafx.scene.text.Font.font("TimesRoman", FontWeight.BOLD, 15);
-        lk = new Label("Enter the number of shortest paths:\t\t\t\t\t  K = ");
+        Font font = Font.font("TimesRoman", FontWeight.BOLD, 15);
+        Label lk = new Label("Enter the number of shortest paths:\t\t\t\t\t  K = ");
         lk.setFont(font);
         root.add(lk, 0, 0);
         k = new TextField();
         k.setText("5");
         root.add(k, 1, 0);
-        lb = new Label("The length of the edge no more then B:\t\t\t\t  B = ");
+        Label lb = new Label("The length of the edge no more then B:\t\t\t\t  B = ");
         lb.setFont(font);
         root.add(lb, 0, 1);
         b = new TextField();
         b.setText("100");
         root.add(b, 1, 1);
-        ls = new Label("Enter the beginning of the path(first vertex number):\t  s = ");
+        Label ls = new Label("Enter the beginning of the path(first vertex number):\t  s = ");
         ls.setFont(font);
-        lt = new Label("Enter the end of the path(last vertex number):\t\t\t  t = ");
+        Label lt = new Label("Enter the end of the path(last vertex number):\t\t\t  t = ");
         lt.setFont(font);
         s = new TextField();
         s.setText("0");

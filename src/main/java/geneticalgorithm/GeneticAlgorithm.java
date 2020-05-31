@@ -116,8 +116,6 @@ public class GeneticAlgorithm extends ConvertRouteToString {
 
     //Оператор скрещивания родителей.
     public void crossing() {
-        Individual indMin, indMax;//по длине хромосомы
-        ArrayList<Individual> arr;
         switch (crossingType) {
             case SINGLE_POINT://Если  в хромосоме есть две одинаковые вершины, отличные от начала и конца и вершин соседних с ними, то померять местами их концы.
                 for (int i = 1; i < masPair.length - 1; i += 2) {
@@ -160,7 +158,12 @@ public class GeneticAlgorithm extends ConvertRouteToString {
                                 population.replaceChromosomeAtIndex(i, chromosomeAfterMutation);
                                 break;
                             }
+                            if(j == 3){
+                                shortensChromosome(currentChromosome);
+                            }
                         }
+                    }else {
+                        shortensChromosome(currentChromosome);
                     }
                 }
         }
@@ -250,8 +253,7 @@ public class GeneticAlgorithm extends ConvertRouteToString {
         if (descendantChromosome2.isPath(matrix)) {
             population.addChomosome(descendantChromosome2);
         }
-        shortensChromosome(parentFirst);
-        shortensChromosome(parentSecond);
+
     }
 
     public void twoPointCrossover(Individual parentFirst, Individual parentSecond) {
@@ -286,8 +288,8 @@ public class GeneticAlgorithm extends ConvertRouteToString {
 
         Individual descendantChromosome1 = new Individual(parentFirst);
         Individual descendantChromosome2 = new Individual(parentSecond);
-        descendantChromosome2.changeChromosome(parentFirst.getChromomeStructure().subList(indexBeginFirst, indexEndFirst + 1), indexBeginSecond, indexEndSecond);
-        descendantChromosome1.changeChromosome(parentSecond.getChromomeStructure().subList(indexBeginSecond, indexEndSecond + 1), indexBeginFirst, indexEndFirst);
+        descendantChromosome2.changeChromosome(new LinkedList<>(parentFirst.getChromomeStructure().subList(indexBeginFirst, indexEndFirst + 1)), indexBeginSecond, indexEndSecond);
+        descendantChromosome1.changeChromosome(new LinkedList<>(parentSecond.getChromomeStructure().subList(indexBeginSecond, indexEndSecond + 1)), indexBeginFirst, indexEndFirst);
 
         descendantChromosome1.removeDublicatesVertex();
         descendantChromosome2.removeDublicatesVertex();

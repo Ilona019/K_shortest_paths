@@ -25,6 +25,7 @@ public class AntColonyOptimisation {
     private int colonySize;
     private GenerationMatrix matrix;
     private double[][] pheromoneMatrix;
+    private double[][] visionOfAnts;
     private List<Ant> ants = new ArrayList<>();
     private Random random = new Random();
     private HashMap<Integer, Double> probabilities;
@@ -63,6 +64,8 @@ public class AntColonyOptimisation {
         this.k = k;
         this.Q = Q;
         pheromoneMatrix = new double[numberVertex][numberVertex];
+        visionOfAnts = new double[numberVertex][];
+        setupVisionAnts();
         probabilities = new HashMap<>();
         IntStream.range(0, colonySize)
                 .forEach(i -> {
@@ -71,6 +74,29 @@ public class AntColonyOptimisation {
         antsColonyBest = new LinkedList<>();
         currentColonyBest = new LinkedList<>();
         countIterations = 0;
+
+    }
+
+    public void setupVisionAnts() {
+        for (int i = 1, l = 1; i < matrix.getCountVerteces(); i++, l++) {
+            visionOfAnts[i] = new double[l];
+
+            for (int j = 0; j < l; j++) {
+                if (matrix.getWeight(i, j) != 0)
+                    visionOfAnts[i][j] = Math.pow(1.0 / matrix.getWeight(i, j), betta);
+                else visionOfAnts[i][j] = 0;
+            }
+        }
+    }
+
+    //получить элемент из треугольного массива по индексам строки и столбца;
+    public double getVision(int i, int j) {
+        if (i < j) {
+            return visionOfAnts[j][i];
+        } else if (i == j) {
+            return 0;
+        }
+        return visionOfAnts[i][j];
     }
 
     public void startAntOptimization() {
@@ -217,14 +243,14 @@ public class AntColonyOptimisation {
 
         for (int v : ant.getNeighborsVertexForLastVertex()) {
             if (!ant.visited(v)) {
-                amountPheromone += Math.pow(pheromoneMatrix[i][v], alpha) * Math.pow(1.0 / matrix.getWeight(i, v), betta);
+                amountPheromone += Math.pow(pheromoneMatrix[i][v], alpha) * getVision(i, v);
             }
         }
 
 
         for (int v : ant.getNeighborsVertexForLastVertex()) {
             if (!ant.visited(v)) {//если вершину не посещали ранее => можно переходить в неё.
-                double numerator = Math.pow(pheromoneMatrix[i][v], alpha) * Math.pow(1.0 / matrix.getWeight(i, v), betta);
+                double numerator = Math.pow(pheromoneMatrix[i][v], alpha) * getVision(i, v);
                 probabilities.put(v, numerator / amountPheromone);
             }
         }

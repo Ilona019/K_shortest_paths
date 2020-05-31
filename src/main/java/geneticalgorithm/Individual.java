@@ -38,7 +38,7 @@ public class Individual {
 
     //Конструктор для создания копии объекта
     public Individual(Individual indCopy) {
-        chromosome = (LinkedList<Integer>) indCopy.chromosome.clone();
+        chromosome = new LinkedList<>(indCopy.chromosome);
         route = indCopy.getLengthRoute();
         fitnessF = indCopy.getFitnessF();
     }
@@ -158,14 +158,14 @@ public class Individual {
 
     //Содержит хромосома номер вершины, начиная с номера index? Да - вернуть её номер
     public int isNumberVertex(int vertex, int index) {
-        int indexEqualsVetex = -1;
+        int indexEqualsVertex = -1;
         for (int i = index; i < chromosome.size() - 1; i++) {
             if (chromosome.get(i) == vertex) {
-                indexEqualsVetex = i;
+                indexEqualsVertex = i;
             }
         }
 
-        return indexEqualsVetex;
+        return indexEqualsVertex;
     }
 
     //Заменить фраграмент [indexBegin indexEnd] хромосомы на передаваемый фрагмент списка.
@@ -178,10 +178,7 @@ public class Individual {
     //Получить хромосому будущего потомка в виде списка
     public LinkedList<Integer> getDescendantChromosome(int point, int pointParent2, Individual parent2) {
         LinkedList<Integer> newDescendant = new LinkedList<>(chromosome.subList(0, point + 1));
-
-        for (int i = pointParent2 + 1; i < parent2.getChromomeStructure().size(); i++) {
-            newDescendant.add(parent2.getChromomeStructure().get(i));
-        }
+        newDescendant.addAll(new LinkedList<>(parent2.getChromomeStructure().subList(pointParent2+1, parent2.getChromomeStructure().size())));
         return newDescendant;
     }
 
@@ -203,7 +200,7 @@ public class Individual {
 
             for (int i = 1; i < chromosome.size() - 1; i++) {
                 double random = Math.random();
-                if (random >= mutationProbability) {
+                if (random <= mutationProbability) {
                     if (chromosome.size() != 2) {
                         positionChromosome = i;
                         do {
