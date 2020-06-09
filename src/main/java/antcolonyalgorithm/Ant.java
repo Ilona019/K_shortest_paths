@@ -96,12 +96,8 @@ public class Ant extends ConvertRouteToString {
     }
 
     public void deleteBadPathTS() {
-        int count = 0;
-        while (count != (route.size() - 1 - indexNewPath)) {
-            Integer vertexRemoved = route.removeLast();
-            routeLength -= matrix.getWeight(route.getFirst(), vertexRemoved);
-            count++;
-        }
+        int sizeRoute = route.size();
+        route.subList(indexNewPath + 1, sizeRoute).clear();
     }
 
     public int getRouteLength() {

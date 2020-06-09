@@ -170,7 +170,7 @@ public class VisualizationViewerGraph {
         menuBar.getMenu(0).getItem(1).addActionListener((ActionEvent eventLoadGraph) -> {
             if (eventLoadGraph.getSource() == menuBar.getMenu(0).getItem(1)) {
                 int returnVal = fileChooser.showOpenDialog(frame);
-
+                String TITLE_message = "Error message";
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     File file = fileChooser.getSelectedFile();
                     String fileName = file.toString();
@@ -179,7 +179,10 @@ public class VisualizationViewerGraph {
                         fileReader = new BufferedReader(
                                 new FileReader(fileName));
                     } catch (FileNotFoundException e) {
-                        e.printStackTrace();
+                        JOptionPane.showMessageDialog(vv,
+                                new String[]{fileName + "\n" + "File not found!"},
+                                TITLE_message,
+                                JOptionPane.ERROR_MESSAGE);
                     }
                     Transformer<GraphMetadata, Graph<GraphElements.MyVertex, GraphElements.MyEdge>>
                             graphTransformer = metadata -> new
@@ -217,20 +220,21 @@ public class VisualizationViewerGraph {
                             = metadata -> GraphElements.MyEdgeFactory.getInstance().create();
 
                     /* Create the graphMLReader2 */
-                    assert fileReader != null;
-                    GraphMLReader2<Graph<GraphElements.MyVertex, MyEdge>, GraphElements.MyVertex, MyEdge>
-                            graphReader = new
-                            GraphMLReader2<>
-                            (fileReader, graphTransformer, vertexTransformer,
-                                    edgeTransformer, hyperEdgeTransformer);
+                    if (fileReader != null) {
+                        GraphMLReader2<Graph<GraphElements.MyVertex, MyEdge>, GraphElements.MyVertex, MyEdge>
+                                graphReader = new
+                                GraphMLReader2<>
+                                (fileReader, graphTransformer, vertexTransformer,
+                                        edgeTransformer, hyperEdgeTransformer);
 
-                    try {
-                        /* Get the new graph object from the GraphML file */
-                        graph = (SparseMultigraph<GraphElements.MyVertex, MyEdge>) graphReader.readGraph();
-                    } catch (GraphIOException ignored) {
+                        try {
+                            /* Get the new graph object from the GraphML file */
+                            graph = (SparseMultigraph<GraphElements.MyVertex, MyEdge>) graphReader.readGraph();
+                        } catch (GraphIOException ignored) {
+                        }
+                        layout.setGraph(graph);
+                        frame.repaint();
                     }
-                    layout.setGraph(graph);
-                    frame.repaint();
                 }
             }
         });
@@ -401,14 +405,14 @@ public class VisualizationViewerGraph {
             chEdgeList = formEdgesList(listOfShortcut.get(i));//получить список ребер.
             // for all edges, paint edges that are in minimum path
             for (GraphElements.MyEdge e : chEdgeList) {
-
-                if (e.getFlagPaint() == 0) {//ещё не проходили по ребру, добавить это ребо для окраски в массив
+                if (e.getFlagPaint() == 0) {//ещё не проходили по ребру, добавить это ребро для окраски в массив
                     path.add(e);
                     e.setFlagPaint(1);
                 } else {
                     Collection<GraphElements.MyVertex> masVer;
                     masVer = graph.getIncidentVertices(e);//массив вершин, содержащих ребро
                     GraphElements.MyEdge paralEdge = new MyEdge("ParalEdge" + numEdge++, e.getWeight());
+                    paralEdge.setFlagPaint(1);
                     graph.addEdge(paralEdge, masVer);//добавить параллельное ребро
                     path.add(paralEdge);
                 }
@@ -424,9 +428,9 @@ public class VisualizationViewerGraph {
 
         for (int i = 0; i < listVerteces.size() - 1; i++) {
             e = graph.findEdge(matrix.getVertexOfIndex(listVerteces.get(i)), matrix.getVertexOfIndex(listVerteces.get(i + 1)));
-            if (!edgesList.contains(e)) {
-                edgesList.add(e);
-            }
+            //if (!edgesList.contains(e)) {
+            edgesList.add(e);
+            //  }
         }
         return edgesList;
     }

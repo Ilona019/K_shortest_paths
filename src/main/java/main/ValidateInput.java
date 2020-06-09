@@ -80,7 +80,7 @@ public class ValidateInput {
 
     public void checkParametersGeneticAlgorithm(TextField k, TextField numberPopulation, TextField probability) {
         String errors = "";
-        if (!isPositiveNumber(numberPopulation.getText()) ||  Integer.parseInt(k.getText()) > Integer.parseInt(numberPopulation.getText())) {
+        if (!isPositiveNumber(numberPopulation.getText()) || Integer.parseInt(k.getText()) > Integer.parseInt(numberPopulation.getText())) {
             errors += " You incorrectly input the N! It is  positive, integer number!\n N > 0 AND N >= " + Integer.parseInt(k.getText()) + " (K).\n";
         }
         if (!isProbability(probability.getText())) {
@@ -92,7 +92,7 @@ public class ValidateInput {
     private void checkDialogACO(TextField k, TextField colonySize, TextField alpha, TextField betta, TextField evaporation, TextField maxIterations, TextField Q) {
         String errors = "";
         if (!isPositiveNumber(colonySize.getText()) || Integer.parseInt(k.getText()) > Integer.parseInt(colonySize.getText())) {
-            errors += " You incorrectly input the colony size! It is  positive, integer number!\n Colony size > 0 AND Colony size >= " +  Integer.parseInt(k.getText()) + " (K).\n";
+            errors += " You incorrectly input the colony size! It is  positive, integer number!\n Colony size > 0 AND Colony size >= " + Integer.parseInt(k.getText()) + " (K).\n";
         }
         if (!isNonNegativeNumber(alpha.getText())) {
             errors += "* You incorrectly input the alpha. It is  non negative, integer number!\n";

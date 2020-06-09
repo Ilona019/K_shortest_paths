@@ -13,7 +13,7 @@ import java.util.stream.Stream;
  * @author Ilona
  */
 public class AntColonyOptimisation {
-    private double initialPheromone = 1.0;
+    private double initialPheromone = 1;
     private int alpha;
     private int betta;
     private double evaporation;
@@ -31,23 +31,21 @@ public class AntColonyOptimisation {
     private HashMap<Integer, Double> probabilities;
 
     private LinkedList<Ant> antsColonyBest;
-    private LinkedList<Ant> currentColonyBest;
     private int b;
     private int k;
     private long startTime;
     private float durationAlg;
     private int countIterations;
-    private int countIterationsOnBestColony;
 
     //констуртор для запонения полей диалогового окна по умолчанию.
-    public AntColonyOptimisation() {
-        this.colonySize = 20;
+    public AntColonyOptimisation(int k) {
+        this.colonySize = 2 * k;
         this.maxIterations = 100;
         this.alpha = 1;
         this.betta = 3;
-        this.evaporation = 0.4;
+        this.evaporation = 0.09;
         this.b = 5;
-        this.k = 5;
+        this.k = k;
         this.Q = 500;
         countIterations = 0;
     }
@@ -66,15 +64,14 @@ public class AntColonyOptimisation {
         pheromoneMatrix = new double[numberVertex][numberVertex];
         visionOfAnts = new double[numberVertex][];
         setupVisionAnts();
+        setupTrails();
         probabilities = new HashMap<>();
         IntStream.range(0, colonySize)
                 .forEach(i -> {
                     ants.add(new Ant(numberVertex, matrix));
                 });
         antsColonyBest = new LinkedList<>();
-        currentColonyBest = new LinkedList<>();
         countIterations = 0;
-
     }
 
     public void setupVisionAnts() {
@@ -117,7 +114,6 @@ public class AntColonyOptimisation {
 
     private void run() {
         setupAnts();
-        clearTrails();
         moveAnts();
         updateTrails();
         updateListBest();
@@ -182,13 +178,11 @@ public class AntColonyOptimisation {
     }
 
     private int selectNextVertex(Ant ant) {
-
         double r = random.nextDouble();
         double total = 0;
 
         while (true) {
             calculateProbabilities(ant);
-
             //сортировка по возрастанию хэша вероятностей попадания в следующую вершину
             probabilities = probabilities.entrySet()
                     .stream()
@@ -199,6 +193,7 @@ public class AntColonyOptimisation {
                             (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
             if (ant.getIndexNewPath() == 0) {
+
                 if (probabilities.isEmpty() && (ant.getCurrentVertex() != matrix.getS())) {
                     ant.oneStepVertexBack();
                     probabilities.clear();
@@ -215,7 +210,6 @@ public class AntColonyOptimisation {
             }
         }
 
-
         for (Map.Entry<Integer, Double> entry : probabilities.entrySet()) {
             total += entry.getValue();
             if (r <= total) {
@@ -223,6 +217,7 @@ public class AntColonyOptimisation {
             }
 
         }
+
         throw new RuntimeException("There are no other vertex");
 
     }
@@ -242,14 +237,14 @@ public class AntColonyOptimisation {
         double amountPheromone = 0.0;
 
         for (int v : ant.getNeighborsVertexForLastVertex()) {
-            if (!ant.visited(v)) {
+            if (!ant.visited(v) && matrix.getWeight(ant.getRoute().getLast(), v) <= b) {
                 amountPheromone += Math.pow(pheromoneMatrix[i][v], alpha) * getVision(i, v);
             }
         }
 
 
         for (int v : ant.getNeighborsVertexForLastVertex()) {
-            if (!ant.visited(v)) {//если вершину не посещали ранее => можно переходить в неё.
+            if (!ant.visited(v) && matrix.getWeight(ant.getRoute().getLast(), v) <= b) {//если вершину не посещали ранее => можно переходить в неё.
                 double numerator = Math.pow(pheromoneMatrix[i][v], alpha) * getVision(i, v);
                 probabilities.put(v, numerator / amountPheromone);
             }
@@ -259,26 +254,39 @@ public class AntColonyOptimisation {
     private void updateTrails() {
         for (int i = 0; i < numberVertex; i++) {
             for (int j = 0; j < numberVertex; j++) {
-                pheromoneMatrix[i][j] *= (1 - evaporation) * pheromoneMatrix[i][j];
+                pheromoneMatrix[i][j] *= (1 - evaporation);
             }
         }
-        for (Ant ant : ants) {
-            double contribution = (double) Q / ant.getRouteLength();
-            for (int i = 0; i < ant.getRoute().size() - 1; i++) {
-                pheromoneMatrix[ant.getAtIndexVertex(i)][ant.getAtIndexVertex(i + 1)] += contribution;
-            }
 
+        for (Ant ant : ants) {
+            if (ant.fitnessFunctionWeightST(b)) {
+                double contribution = (double) Q / ant.calculateRouteLengthToT(matrix);
+                for (int i = 0; i < ant.getIndexNewPath() - 1; i++) {
+                    pheromoneMatrix[ant.getAtIndexVertex(i)][ant.getAtIndexVertex(i + 1)] += contribution;
+                }
+            }
+        }
+
+
+        for (Ant ant : ants) {
+            if (ant.fitnessFunctionWeightST(b)) {
+                double contribution = (double) Q / ant.calculateRouteLengthToS(matrix);
+                for (int i = ant.getIndexNewPath(); i < ant.getRoute().size() - 1; i++) {
+                    pheromoneMatrix[ant.getAtIndexVertex(i)][ant.getAtIndexVertex(i + 1)] += contribution;
+                }
+            }
         }
     }
 
     private void updateListBest() {
         Ant cloneAnt;
-        currentColonyBest.clear();
         for (Ant a : ants) {
+
+
             if (a.fitnessFunctionWeightST(b)) {
                 cloneAnt = new Ant(a, a.getRouteST());
                 if (!existInColonyBest(cloneAnt)) {
-                    currentColonyBest.add(cloneAnt);
+                    antsColonyBest.add(cloneAnt);
                 }
             }
 
@@ -288,16 +296,10 @@ public class AntColonyOptimisation {
 
                 cloneAnt = new Ant(a, pathTS);
                 if (!existInColonyBest(cloneAnt)) {
-                    currentColonyBest.add(cloneAnt);
+                    antsColonyBest.add(cloneAnt);
                 }
             }
         }
-        if (antsColonyBest.size() <= currentColonyBest.size()) {
-            antsColonyBest.clear();
-            antsColonyBest = new LinkedList<>(currentColonyBest);
-            countIterationsOnBestColony = countIterations + 1;
-        }
-
     }
 
     private void sortBestColony() {
@@ -306,17 +308,19 @@ public class AntColonyOptimisation {
     }
 
 
-    private void clearTrails() {
+    private void setupTrails() {
         IntStream.range(0, numberVertex)
                 .forEach(i -> {
                     IntStream.range(0, numberVertex)
-                            .forEach(j -> pheromoneMatrix[i][j] = initialPheromone);
+                            .forEach(j ->
+                                    pheromoneMatrix[i][j] = initialPheromone
+                            );
                 });
     }
 
 
     public boolean existInColonyBest(Ant newAnt) {
-        for (Ant ant : currentColonyBest) {
+        for (Ant ant : antsColonyBest) {
             if (ant.equalsRoute(newAnt)) {
                 return true;
             }
@@ -329,7 +333,7 @@ public class AntColonyOptimisation {
     }
 
     public int getCountIterationsOnBestColony() {
-        return countIterationsOnBestColony;
+        return countIterations;
     }
 
     public float getDuration() {

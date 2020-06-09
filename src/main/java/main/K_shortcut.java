@@ -16,7 +16,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -68,7 +67,7 @@ public class K_shortcut extends Application {
 
         settingListenersForST();
 
-        gAlg = new GeneticAlgorithm();
+        gAlg = new GeneticAlgorithm(Integer.parseInt(k.getText()));
         jeneticsGA = new JeneticsGA();
         btnGeneticAlgorithm.setOnAction((ActionEvent eventGA) -> {
             if (!validationInput.checkWindowСonditionTask(s, t, k, b)) {
@@ -119,7 +118,7 @@ public class K_shortcut extends Application {
             }
         });
 
-        antColony = new AntColonyOptimisation();
+        antColony = new AntColonyOptimisation(Integer.parseInt(k.getText()));
         btnAntColonyAlgorithm.setOnAction((ActionEvent eventACO) -> {
             if (!validationInput.checkWindowСonditionTask(s, t, k, b)) {
                 AntColonyAlgorithmEditDialog antDialog = new AntColonyAlgorithmEditDialog(visGraph, antColony, k);
@@ -153,6 +152,7 @@ public class K_shortcut extends Application {
     }
 
     public void performGeneticAlgorithm(GeneticAlgorithmEditDialog gaDialog) {
+        int last = 0;
         long old = System.currentTimeMillis(); // time start
         Individual chromosome;
         population = new Population();
@@ -184,13 +184,15 @@ public class K_shortcut extends Application {
                 int count_replace = 0;//Число замен
                 ArrayList<Integer> vertexDublicate = new ArrayList<>();//список вершин, заменили из резерва
                 if (!gAlg.getReserveChromosomes().isEmpty()) {
-                    for (int i = 0; i < population.size(); i++) {
+                    for (int i = gAlg.getLastIndexUniqueChromosome() + 1; i < population.size(); i++) {
                         for (int j = i + 1; j < population.size(); j++) {
                             if (population.getAtIndex(i).equalsChromosome(population.getAtIndex(j))) {
                                 replace_ind = gAlg.returnItemDifferentOthers(population); //Вернуть отличный от других в популяции элемент из резерва.
                                 if (replace_ind != null) {
-                                    population.replaceChromosomeAtIndex(j, new Individual(replace_ind));//Заменить повторяющийся уникальным для популяции. 
+                                    population.replaceChromosomeAtIndex(j, new Individual(replace_ind));//Заменить повторяющийся уникальным для популяции.
                                     vertexDublicate.add(j);
+                                    last = i;
+                                    System.out.println(last);
                                     count_replace++;
                                     if (count_replace == gAlg.getReserveChromosomes().size()) {//"кончились" элементы резерва для замены.
                                         break;
@@ -204,22 +206,6 @@ public class K_shortcut extends Application {
                     }
                 }
 
-                //Замена худщих хромосом из резерва
-                if (count_replace != gAlg.getReserveChromosomes().size()) {
-                    for (int i = 0; i < population.size(); i++) {
-                        if (!population.getAtIndex(i).getFitnessF()) {
-                            replace_ind = gAlg.returnItemDifferentOthers(population); //Вернуть отличный от других в популяции элемент из резерва.
-                            if (replace_ind != null) {
-                                population.replaceChromosomeAtIndex(i, new Individual(replace_ind));//Заменить повторяющийся уникальным для популяции.
-                                vertexDublicate.add(i);
-                                count_replace++;
-                                if (count_replace == gAlg.getReserveChromosomes().size()) {//"кончились" элементы резерва для замены.
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
                 //Поместим отличные от хромосом в резерве, хромосомы из популяции, удовлетворяющие фитнесс ф-ции
                 for (int i = 0; i < population.size(); i++) {
                     if (population.getAtIndex(i).getFitnessF() && !vertexDublicate.contains(i)) {

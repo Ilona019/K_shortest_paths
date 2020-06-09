@@ -1,13 +1,10 @@
 package geneticalgorithm;
 
 import grapheditor.GenerationMatrix;
-import io.jenetics.Chromosome;
 import main.ConvertRouteToString;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * @author Илона
@@ -25,14 +22,15 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     private int n;
     private LinkedList<Individual> reserveChromosomes;
     private double mutationProbability;
+    private int lastIndexUniqueChromosome = 0;
 
-    public GeneticAlgorithm() {
+    public GeneticAlgorithm(int k) {
         this.choiceParents = ChoiceOfParents.PANMIXIA;
         this.crossingType = CrossingType.SINGLE_POINT;
         this.mutationType = MutationType.UNIFORM;
         this.selectionType = SelectionType.EXCLUSION;
-        this.n = 20;
-        mutationProbability = 0.5;
+        this.n = 2 * k;
+        mutationProbability = 0.25;
     }
 
     public GeneticAlgorithm(GenerationMatrix matrix, Population population, String choiceParents, String crossingType, String mutationType, String selectionType, int b, int n, double mutationProbability) {
@@ -58,24 +56,26 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     public void selection() {
         switch (selectionType) {
             case EXCLUSION:
+                lastIndexUniqueChromosome = 0;
                 RouteComparator myRouteComparator = new RouteComparator();
                 population.getPopulation().sort(myRouteComparator);//сортировка возрастанию длины пути
                 int needDelete = population.getPopulation().size() - n;//надо удалить
                 int deleted = 0;//кол-во удалённых хромосом
-                Population reserveIndividual = new Population();
-                for (int i = 0 ;  i < population.getPopulation().size(); i++) {
+                for (int i = 0; i < population.getPopulation().size(); i++) {
                     if (deleted == needDelete) {
                         break;
                     }
-                        if(existInNewPopulation(population.getAtIndex(i), population.getPopulation().subList(0, i))) {
-                            reserveIndividual.addChomosome(population.getPopulation().remove(i--));
-                            deleted ++;
-                        }
+                    if (existInNewPopulation(population.getAtIndex(i), population.getPopulation().subList(0, i))) {
+                        population.getPopulation().remove(i--);
+                        deleted++;
+                    }
+                    lastIndexUniqueChromosome = i;
                 }
                 if (needDelete > deleted) {//если не достаточно хромосом удалили, то доудалим наиболее длинные по длине пути.
                     while (needDelete != deleted) {
                         population.getPopulation().removeLast();
                         deleted++;
+                        lastIndexUniqueChromosome--;
                     }
                 }
                 break;
@@ -158,11 +158,11 @@ public class GeneticAlgorithm extends ConvertRouteToString {
                                 population.replaceChromosomeAtIndex(i, chromosomeAfterMutation);
                                 break;
                             }
-                            if(j == 3){
+                            if (j == 3) {
                                 shortensChromosome(currentChromosome);
                             }
                         }
-                    }else {
+                    } else {
                         shortensChromosome(currentChromosome);
                     }
                 }
@@ -234,13 +234,13 @@ public class GeneticAlgorithm extends ConvertRouteToString {
         point1 = (int) (Math.random() * (parentFirst.getSizeChromosome() - 2)) + 1;
         point2 = (int) (Math.random() * (parentSecond.getSizeChromosome() - 2)) + 1;
 
-        if(parentFirst.getSizeChromosome() == 2) {
+        if (parentFirst.getSizeChromosome() == 2) {
             point1 = 0;
         }
-        if(parentSecond.getSizeChromosome() == 2) {
+        if (parentSecond.getSizeChromosome() == 2) {
             point2 = 0;
         }
-        if(point1 == 0 && point2 == 0) {
+        if (point1 == 0 && point2 == 0) {
             return;
         }
 
@@ -248,9 +248,11 @@ public class GeneticAlgorithm extends ConvertRouteToString {
         Individual descendantChromosome2 = new Individual(parentSecond.getDescendantChromosome(point2, point1, parentFirst), matrix, b);
 
         if (descendantChromosome1.isPath(matrix)) {
+            descendantChromosome1.recalculateFitnessFunc(matrix, b);
             population.addChomosome(descendantChromosome1);
         }
         if (descendantChromosome2.isPath(matrix)) {
+            descendantChromosome2.recalculateFitnessFunc(matrix, b);
             population.addChomosome(descendantChromosome2);
         }
 
@@ -295,9 +297,11 @@ public class GeneticAlgorithm extends ConvertRouteToString {
         descendantChromosome2.removeDublicatesVertex();
 
         if (descendantChromosome1.isPath(matrix)) {
+            descendantChromosome1.recalculateFitnessFunc(matrix, b);
             population.addChomosome(descendantChromosome1);
         }
         if (descendantChromosome2.isPath(matrix)) {
+            descendantChromosome2.recalculateFitnessFunc(matrix, b);
             population.addChomosome(descendantChromosome2);
         }
     }
@@ -324,6 +328,10 @@ public class GeneticAlgorithm extends ConvertRouteToString {
 
     public double getMutationProbability() {
         return mutationProbability;
+    }
+
+    public int getLastIndexUniqueChromosome() {
+        return lastIndexUniqueChromosome;
     }
 
     public void setN(int n) {

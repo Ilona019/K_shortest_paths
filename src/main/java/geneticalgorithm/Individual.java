@@ -1,8 +1,6 @@
 package geneticalgorithm;
 
 import grapheditor.GenerationMatrix;
-import grapheditor.GraphElements;
-import grapheditor.GraphElements.MyEdge;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -39,8 +37,8 @@ public class Individual {
     //Конструктор для создания копии объекта
     public Individual(Individual indCopy) {
         chromosome = new LinkedList<>(indCopy.chromosome);
-        route = indCopy.getLengthRoute();
-        fitnessF = indCopy.getFitnessF();
+        route = indCopy.route;
+        fitnessF = indCopy.fitnessF;
     }
 
     public Individual() {
@@ -178,7 +176,7 @@ public class Individual {
     //Получить хромосому будущего потомка в виде списка
     public LinkedList<Integer> getDescendantChromosome(int point, int pointParent2, Individual parent2) {
         LinkedList<Integer> newDescendant = new LinkedList<>(chromosome.subList(0, point + 1));
-        newDescendant.addAll(new LinkedList<>(parent2.getChromomeStructure().subList(pointParent2+1, parent2.getChromomeStructure().size())));
+        newDescendant.addAll(new LinkedList<>(parent2.getChromomeStructure().subList(pointParent2 + 1, parent2.getChromomeStructure().size())));
         return newDescendant;
     }
 
