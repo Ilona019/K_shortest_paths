@@ -92,7 +92,7 @@ public class VisualizationViewerGraph {
 
         vv.setGraphMouse(graphMouse);
 
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.getContentPane().add(new GraphZoomScrollPane(vv));
 
 
@@ -276,7 +276,6 @@ public class VisualizationViewerGraph {
         vv.getRenderContext().setEdgeFontTransformer(new MyEdgesFont());
         vv.getRenderContext().setEdgeLabelTransformer(new EdgeLabelTransformer());
         vv.getRenderContext().setVertexShapeTransformer(new MySizeVertex());
-        vv.getRenderContext().setVertexLabelTransformer(new ChainedTransformer());
     }
 
     private void repaintAfterUpdates() {
@@ -356,14 +355,6 @@ public class VisualizationViewerGraph {
         return layout;
     }
 
-    public ArrayList<ArrayList<GraphElements.MyEdge>> getPaintedEdgeslist() {
-        return paintedEdgeslist;
-    }
-
-    public ArrayList<MyEdge> getChEdgeList() {
-        return chEdgeList;
-    }
-
     public void setValidationInput(ValidateInput validationInput) {
         this.validationInput = validationInput;
     }
@@ -428,9 +419,7 @@ public class VisualizationViewerGraph {
 
         for (int i = 0; i < listVerteces.size() - 1; i++) {
             e = graph.findEdge(matrix.getVertexOfIndex(listVerteces.get(i)), matrix.getVertexOfIndex(listVerteces.get(i + 1)));
-            //if (!edgesList.contains(e)) {
             edgesList.add(e);
-            //  }
         }
         return edgesList;
     }
@@ -561,7 +550,7 @@ public class VisualizationViewerGraph {
         }
     }
 
-    public static class EdgeLabelTransformer implements Transformer<GraphElements.MyEdge, String> {
+    public static class EdgeLabelTransformer implements Transformer<MyEdge, String> {
 
         @Override
         public String transform(GraphElements.MyEdge e) {
@@ -575,20 +564,13 @@ public class VisualizationViewerGraph {
 
     }
 
-    public static class ChainedTransformer implements Transformer<GraphElements.MyVertex, String> {
-
-        @Override
-        public String transform(GraphElements.MyVertex myVertex) {
-            return "<html><font color=\"black\">" + myVertex.getNumberVertex();
-        }
-    }
-
     //Изменить размер вершины
     public class MySizeVertex implements Transformer<GraphElements.MyVertex, Shape> {
 
         @Override
         public Shape transform(GraphElements.MyVertex i) {
             Ellipse2D circle = new Ellipse2D.Double(-14, -14, 28, 28);
+
             // in this case, the vertex is twice as large//в 1.5 раза больше
             if (validationInput.isNonNegativeNumber(s.getText()) && (Integer.parseInt(i.getName()) == Integer.parseInt(s.getText()))) {
                 return AffineTransform.getScaleInstance(1.5, 1.5).createTransformedShape(circle);

@@ -21,17 +21,9 @@ public class Population extends ConvertRouteToString {
     public void addChomosome(Individual ch) {
         population.add(ch);
     }
-
-    public void deleteChromosomAtIndex(int index) {
-        population.remove(index);
-    }
     
     public void replaceChromosomeAtIndex(int index, Individual newIndividual){
         population.set(index, newIndividual);
-    }
-    
-    public int getIndexChromosome(Individual chromosome) {
-        return population.indexOf(chromosome);
     }
     
     public Individual getAtIndex(int index) {
@@ -59,10 +51,6 @@ public class Population extends ConvertRouteToString {
 
     public void setListPopulation(LinkedList<Individual> list) {
         population = list;
-//        population.clear();
-//        for(Individual item: list){
-//            population.add(new Individual(item));
-//        }
     }
 
     //Ищет особь с наиболее близким по длине маршрута, возвращает её индекс в популяции.
@@ -99,16 +87,6 @@ public class Population extends ConvertRouteToString {
             }
         }
         return false;
-    }
-
-    public void printPopulation(GenerationMatrix m) {
-        ListIterator<Individual> iteratorP = population.listIterator();
-        int i = 0;
-        Individual currentChr;
-        while (iteratorP.hasNext()) {
-            currentChr = iteratorP.next();
-            System.out.println(i++ + ")  route == " + currentChr.getLengthRoute() + "\t" + routeToString(m, currentChr.getChromomeStructure()) + "\n (weight < B) ? = " + currentChr.getFitnessF() + "\n");
-        }
     }
 
     public String convertRoutesToString(GenerationMatrix m) {

@@ -68,7 +68,7 @@ public class CustomChromosome extends Individual implements Chromosome<IntegerGe
     //Представляет ли хромосома путь.
     public boolean isPath() {
         for (int j = 0; j < length - 1; j++) {
-            if (matrix.getWeight(iSeq.get(j).allele(), iSeq.get(j+1).allele()) == 0 || matrix.getS() != iSeq.get(0).allele()|| matrix.getT()!= iSeq.get(length-1).allele() )//нет ребра между вершинами, хромосома не образует путь;
+            if (matrix.getWeight(iSeq.get(j).allele(), iSeq.get(j+1).allele()) == 0 || matrix.getS() != iSeq.get(0).allele()|| matrix.getT()!= iSeq.get(length-1).allele() )//нет ребра между вершинами => хромосома не образует путь;
             {
                 return false;
             }

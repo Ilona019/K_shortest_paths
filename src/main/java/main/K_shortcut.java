@@ -33,7 +33,7 @@ import javafx.scene.text.Font;
 import jeneticsga.JeneticsGA;
 
 /**
- * @author Илона
+ * @author Arefeva Ilona IVT-42BO
  */
 public class K_shortcut extends Application {
 
@@ -59,6 +59,7 @@ public class K_shortcut extends Application {
         primaryStage.setTitle("General parameters task finding the k shortest paths in a graph");
         primaryStage.setScene(createScene());
         primaryStage.show();
+
         visGraph = new VisualizationViewerGraph(s, t);
         listRoutes = new ArrayList<>();
 

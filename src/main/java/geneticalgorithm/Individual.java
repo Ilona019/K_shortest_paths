@@ -71,10 +71,8 @@ public class Individual {
             if (matrix.getWeight(pred, t) != 0) {//хромосома образует путь
                 newChromosome.add(t);
                 path = true;
-                newChromosome = removeDublicatesVertex(newChromosome);
             } else {
                 newChromosome.clear();
-
             }
 
         }

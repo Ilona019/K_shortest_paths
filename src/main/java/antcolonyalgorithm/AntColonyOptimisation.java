@@ -41,8 +41,8 @@ public class AntColonyOptimisation {
     public AntColonyOptimisation(int k) {
         this.colonySize = 2 * k;
         this.maxIterations = 100;
-        this.alpha = 1;
-        this.betta = 3;
+        this.alpha = 0;
+        this.betta = 2;
         this.evaporation = 0.09;
         this.b = 5;
         this.k = k;
@@ -50,11 +50,11 @@ public class AntColonyOptimisation {
         countIterations = 0;
     }
 
-    public AntColonyOptimisation(int colonySize, int alfa, int betta, double evaporation, GenerationMatrix matrix, int maxIterations, int b, int k, int Q) {
+    public AntColonyOptimisation(int colonySize, int alpha, int betta, double evaporation, GenerationMatrix matrix, int maxIterations, int b, int k, int Q) {
         this.numberVertex = matrix.getCountVerteces();
         this.colonySize = colonySize;
         this.maxIterations = maxIterations;
-        this.alpha = alfa;
+        this.alpha = alpha;
         this.betta = betta;
         this.evaporation = evaporation;
         this.matrix = matrix;
@@ -269,7 +269,7 @@ public class AntColonyOptimisation {
 
 
         for (Ant ant : ants) {
-            if (ant.fitnessFunctionWeightST(b)) {
+            if (ant.fitnessFunctionWeightTS(b)) {
                 double contribution = (double) Q / ant.calculateRouteLengthToS(matrix);
                 for (int i = ant.getIndexNewPath(); i < ant.getRoute().size() - 1; i++) {
                     pheromoneMatrix[ant.getAtIndexVertex(i)][ant.getAtIndexVertex(i + 1)] += contribution;

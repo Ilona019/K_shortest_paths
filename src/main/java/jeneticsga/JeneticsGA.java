@@ -103,7 +103,7 @@ public class JeneticsGA extends ConvertRouteToString {
                 selectedSurvivorsSelector = new RouletteWheelSelector<>();
                 break;
             case TOURNAMENT:
-                selectedSurvivorsSelector = new TournamentSelector<>();
+                selectedSurvivorsSelector = new TournamentSelector<>(k/2);
                 break;
         }
 
@@ -121,6 +121,7 @@ public class JeneticsGA extends ConvertRouteToString {
                 .optimize(Optimize.MINIMUM)
                 .populationSize(n)
                 .mapping(EvolutionResult.toUniquePopulation(gtf))
+                .maximalPhenotypeAge(100)
                 .selector(selectedSurvivorsSelector)//отбор сильшейших, выбор выживших и потомков.
                 .alterers(
                         selectedCrossover,
@@ -139,7 +140,7 @@ public class JeneticsGA extends ConvertRouteToString {
                     curChromosome.add(intGene.allele());
                 }
 
-                if (evaluate(genes) < b && !existInReserve(curChromosome)) {
+                if (evaluate(genes) <= b && !existInReserve(curChromosome)) {
                     populationChromosomes.add(new LinkedList<>(curChromosome));
                 }
                 curChromosome.clear();

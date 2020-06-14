@@ -3,7 +3,6 @@ package main;
 import grapheditor.GraphElements;
 import grapheditor.VisualizationViewerGraph;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 
 /**
@@ -91,8 +90,8 @@ public class ValidateInput {
 
     private void checkDialogACO(TextField k, TextField colonySize, TextField alpha, TextField betta, TextField evaporation, TextField maxIterations, TextField Q) {
         String errors = "";
-        if (!isPositiveNumber(colonySize.getText()) || Integer.parseInt(k.getText()) > Integer.parseInt(colonySize.getText())) {
-            errors += " You incorrectly input the colony size! It is  positive, integer number!\n Colony size > 0 AND Colony size >= " + Integer.parseInt(k.getText()) + " (K).\n";
+        if (!isPositiveNumber(colonySize.getText())) {
+            errors += " You incorrectly input the colony size! It is  positive, integer number!\n Colony size > 0.\n";
         }
         if (!isNonNegativeNumber(alpha.getText())) {
             errors += "* You incorrectly input the alpha. It is  non negative, integer number!\n";
@@ -121,10 +120,6 @@ public class ValidateInput {
             }
         }
         return v;
-    }
-
-    private boolean isComboBox(ComboBox<String> cb) {
-        return cb.getValue() != null;
     }
 
     public boolean isPositiveNumber(String text) {
