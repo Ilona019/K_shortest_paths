@@ -14,12 +14,12 @@ import java.util.Random;
 public class Individual {
 
     private LinkedList<Integer> chromosome;//1 хромосома
-    private int route;
+    private int lengthroute;
     private boolean fitnessF;
 
     public Individual(LinkedList<Integer> descendantChromosome, GenerationMatrix matrix, int b) {
         chromosome = descendantChromosome;
-        route = fitnessFunctionPath(matrix);
+        lengthroute = fitnessFunctionPath(matrix);
         fitnessF = fitnessFunctionWeight(b);
     }
 
@@ -30,14 +30,14 @@ public class Individual {
         }
 
         chromosome = generateNewChromosome(countVertex, matrix, s, t);
-        route = fitnessFunctionPath(matrix);
+        lengthroute = fitnessFunctionPath(matrix);
         fitnessF = fitnessFunctionWeight(b);
     }
 
     //Конструктор для создания копии объекта
     public Individual(Individual indCopy) {
         chromosome = new LinkedList<>(indCopy.chromosome);
-        route = indCopy.route;
+        lengthroute = indCopy.lengthroute;
         fitnessF = indCopy.fitnessF;
     }
 
@@ -130,13 +130,13 @@ public class Individual {
     }
 
     public void recalculateFitnessFunc(GenerationMatrix matrix, int b) {
-        route = fitnessFunctionPath(matrix);
+        lengthroute = fitnessFunctionPath(matrix);
         fitnessF = fitnessFunctionWeight(b);
     }
 
     //Вес пути не превосходит В?
     public boolean fitnessFunctionWeight(int b) {
-        return route <= b;
+        return lengthroute <= b;
     }
 
     //Наибольшая по длине хромосома из 2 - х, первый элемент массива наибольший
@@ -213,7 +213,7 @@ public class Individual {
             removeDublicatesVertex(chromosome);
         }
         if (isPath(matrix)) {
-            route = fitnessFunctionPath(matrix);
+            lengthroute = fitnessFunctionPath(matrix);
             fitnessF = fitnessFunctionWeight(b);
             return true;
         }
@@ -236,6 +236,18 @@ public class Individual {
         chromosome.add(positionChromosome, randomVertex);
     }
 
+    public int getCountDifferenceGenes(Individual ind) {
+        int count = 0;
+        int size = Math.min(chromosome.size(), ind.chromosome.size());
+
+        for (int i = 1; i < size - 1; i++) {
+            if (!ind.getChromomeStructure().get(i).equals(chromosome.get(i))) {
+                count++;
+            }
+        }
+        return count;
+    }
+
 
     public LinkedList<Integer> getChromomeStructure() {
         return chromosome;
@@ -246,7 +258,7 @@ public class Individual {
     }
 
     public int getLengthRoute() {
-        return this.route;
+        return this.lengthroute;
     }
 
     public boolean getFitnessF() {

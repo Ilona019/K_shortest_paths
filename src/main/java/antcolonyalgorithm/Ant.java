@@ -141,10 +141,6 @@ public class Ant extends ConvertRouteToString {
         createListOfNeighboringVertices();
     }
 
-    public boolean maybyVisitVertex(int vertex) {
-        return neighborsVertexForLastVertex.contains(vertex);
-    }
-
     @Override
     public String toString() {
         StringBuilder strRoute = new StringBuilder();

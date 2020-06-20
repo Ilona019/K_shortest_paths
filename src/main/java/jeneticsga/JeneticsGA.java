@@ -103,7 +103,9 @@ public class JeneticsGA extends ConvertRouteToString {
                 selectedSurvivorsSelector = new RouletteWheelSelector<>();
                 break;
             case TOURNAMENT:
-                selectedSurvivorsSelector = new TournamentSelector<>(k/2);
+                if(k > 2)
+                    selectedSurvivorsSelector = new TournamentSelector<>(k);
+                else selectedSurvivorsSelector = new TournamentSelector<>();
                 break;
         }
 

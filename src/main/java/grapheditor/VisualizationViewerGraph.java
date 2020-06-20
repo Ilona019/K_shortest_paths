@@ -95,7 +95,6 @@ public class VisualizationViewerGraph {
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.getContentPane().add(new GraphZoomScrollPane(vv));
 
-
         repaintAfterUpdates();
 
         JMenuBar menuBar = createMenuBar(graphMouse);

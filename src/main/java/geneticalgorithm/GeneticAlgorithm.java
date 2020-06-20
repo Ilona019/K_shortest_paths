@@ -95,16 +95,16 @@ public class GeneticAlgorithm extends ConvertRouteToString {
                     masPair[i] = (int) (Math.random() * (population.size() - 1));
                 }
                 break;
-            case INBREEDING://Первая особь в паре выбирается случайно, вторая особь - ближайщая по длине маршрута.
+            case INBREEDING://Первая особь в паре выбирается случайно, вторая особь - ближайщая по длине хромосомы.
                 for (int i = 0; i < (2 * population.size()); i += 2) {
                     masPair[i] = (int) (Math.random() * (population.size() - 1));
-                    masPair[i + 1] = population.indexNearbyRoute(masPair[i]);
+                    masPair[i + 1] = population.indexSameChromosome(masPair[i]);
                 }
                 break;
-            case OUTBREEDING://Первая особь в паре выбирается случайно, вторая особь - c дальним по длине маршрута.
+            case OUTBREEDING://Первая особь в паре выбирается случайно, вторая особь - c непохожая по длине хромосомы.
                 for (int i = 0; i < (2 * population.size() - 1); i += 2) {
                     masPair[i] = (int) (Math.random() * (population.size() - 1));
-                    masPair[i + 1] = population.indexMaxRoute();
+                    masPair[i + 1] = population.indexDifferenceChromosome(masPair[i]);
                 }
                 break;
         }
@@ -220,12 +220,6 @@ public class GeneticAlgorithm extends ConvertRouteToString {
     // Добавить в резервный список хромосому, не ссылку на её, а копию.
     public void addReserveChromosome(Individual ind) {
         reserveChromosomes.add(new Individual(ind));
-    }
-
-    public void printReserveList() {
-        for (Individual reserveChromosome : reserveChromosomes) {
-            System.out.println(routeToString(matrix, reserveChromosome.getChromomeStructure()) + " ");
-        }
     }
 
     public void singlePointCrossover(Individual parentFirst, Individual parentSecond) {
