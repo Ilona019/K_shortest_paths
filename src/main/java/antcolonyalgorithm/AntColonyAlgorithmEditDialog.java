@@ -119,7 +119,6 @@ public class AntColonyAlgorithmEditDialog {
         textQ = new TextField(String.valueOf(aco.getQ()));
         root.add(textQ, 1, 5);
 
-
         countIterations = new Label("");
         countIterations.setFont(font);
         root.add(countIterations, 1, 8);
@@ -160,10 +159,6 @@ public class AntColonyAlgorithmEditDialog {
 
     public void setCountIterations(int count) {
         countIterations.setText("Count iterations:\t" + count);
-    }
-
-    public void setCountIterationsOnBestColony(int count) {
-        countIterationsOnBestColony.setText("in the\t" + count + "\tstep.");
     }
 
     public void setDurationAlgorithm(float time) {

@@ -329,7 +329,7 @@ public class VisualizationViewerGraph {
         menuBar.add(menuFile);
 
         JMenu modeMenu = graphMouse.getModeMenu();
-        modeMenu.setText("Mouse Mode");
+        modeMenu.setText("Mouse mode");
         modeMenu.setIcon(null);
         modeMenu.setPreferredSize(new Dimension(80, 20));
         menuBar.add(modeMenu);

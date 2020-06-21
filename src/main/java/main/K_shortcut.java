@@ -136,7 +136,6 @@ public class K_shortcut extends Application {
 
                         antDialog.setResult(antColony.getAntsColonyBest().size());
                         antDialog.setCountIterations(antColony.getCountIterations());
-                        antDialog.setCountIterationsOnBestColony(antColony.getCountIterationsOnBestColony());
                         antDialog.setDurationAlgorithm(antColony.getDuration());
 
                         displayRoutesOnGraph();
